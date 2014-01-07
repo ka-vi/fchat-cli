@@ -317,6 +317,7 @@ UI.pushChat = function(channel, character, message) {
 	box.pushChat(message);
 }
 
+/*
 for(var cmd in fserver) {
 	G.server.on(cmd, (function(_cmd) {
 		return function(args) {
@@ -325,6 +326,7 @@ for(var cmd in fserver) {
 		};
 	})(cmd));
 }
+*/
 
 UI.currentBox = UI.message;
 UI.focus = [UI.input, UI.message._.list, UI.message];

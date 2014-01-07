@@ -1,0 +1,20 @@
+{
+  "name": "fchat-cli",
+  "version": "0.0.1",
+  "author": "Ka'vi <kavi.orca@gmail.com>",
+  "description": "A CLI client for connecting to the f-list.net chat network",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ka-vi/fchat-cli"
+  },
+  "license": "GPLv3",
+  "engines": {
+    "node": ">=0.10.24"
+  },
+  "dependencies": {
+    "ws": "~0.4.31",
+    "needle": "~0.6.3",
+    "blessed": "0.0.26"
+  }
+}
