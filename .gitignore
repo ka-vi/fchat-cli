@@ -1,0 +1,11 @@
+# Files
+notes.txt
+test.js
+config.js
+
+# Filetypes
+*.swp
+.*.swp
+
+# Paths
+/node_modules
