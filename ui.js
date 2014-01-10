@@ -75,7 +75,7 @@ function binarySearch(a, s) {
 	  , cmp = 0
 	  ;
 	
-	while(min < max) {
+	while(min <= max) {
 		mid = min + Math.floor((max-min)/2);
 		cmp = a[mid].localeCompare(s);
 		if(cmp < 0) {
