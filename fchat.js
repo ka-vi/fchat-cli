@@ -21,14 +21,17 @@ G.send = send;
 G.ws = ws;
 
 ws.on('open', function() {
+	UI = require('./ui');
+	UI.pushMessage('Websocket connected!  Trying to get ticket...');
 	needle.post('https://www.f-list.net/json/getApiTicket.php', {
 		secure: 'yes'
 	,	account: config.account
 	,	password: config.password
 	}, function(err, resp, body) {
 		if(err) {
-			UI.pushMessage(util.inspect(err));
+			UI.pushMessage('Failed to get ticket: ' + util.inspect(err));
 		} else {
+			UI.pushMessage('Got ticket!  Going to identify...');
 			send('IDN', {
 				method: 'ticket'
 			,	account: config.account

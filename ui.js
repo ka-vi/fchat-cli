@@ -8,7 +8,6 @@ var b = require('blessed')
   , fserver = require('./fchat-server')
   , G = require('./global')
   , util = require('util')
-  , rbtree = require('bintrees').RBTree
   ;
 
 var UI = {};
@@ -71,15 +70,20 @@ UI.debug = b.text({
 
 function binarySearch(a, s) {
 	var min = 0
-	  , max = a.length
+	  , mid = 0
+	  , max = a.length - 1
+	  , cmp = 0
 	  ;
 	
 	while(min < max) {
-		var mid = min + Math.floor((max-min)/2);
-		if(a[mid].localeCompare(s) < 0) {
+		mid = min + Math.floor((max-min)/2);
+		cmp = a[mid].localeCompare(s);
+		if(cmp < 0) {
 			min = mid+1;
+		} else if (cmp > 0) {
+			max = mid - 1;
 		} else {
-			max = mid;
+			return mid;
 		}
 	}
 	
@@ -124,7 +128,6 @@ UI.userList = function() {
 		list.down(1);
 		s.render();
 	});
-	list._.rbtree = new rbtree(function(a,b){return a.s.localeCompare(b.s);});
 	list._.arr = [];
 	list._.add = function(item) {
 		var i = binarySearch(list._.arr, item);
@@ -139,7 +142,7 @@ UI.userList = function() {
 	return list;
 }
 
-UI.chatBox = function(channel, title) {
+UI.baseBox = function(title) {
 	var box = b.text({
 		parent: s
 	,	top: 0
@@ -169,6 +172,11 @@ UI.chatBox = function(channel, title) {
 			}
 		}
 	});
+	return box;
+};
+
+UI.chatBox = function(channel, title) {
+	var box = UI.baseBox(title);
 	box._ = G.chats[channel] = {
 		channel: channel
 	,	title: title
@@ -179,7 +187,21 @@ UI.chatBox = function(channel, title) {
 	G.chatsArray.push(G.chats[channel]);
 	G.chatsIndex = G.chatsArray.length - 1;
 	return box;
-}
+};
+
+UI.pmBox = function(character) {
+	var box = UI.baseBox(character);
+	box._ = G.pms[character] = {
+		channel: null
+	,	title: character
+	,	box: box
+	,	list: UI.userList()
+	,	pushChat: pushBuffer(box)
+	};
+	G.chatsArray.push(G.pms[character]);
+	G.chatsIndex = G.chatsArray.length - 1;
+	return box;
+};
 
 UI.message = UI.chatBox('_main', 'Main Window');
 
@@ -270,8 +292,10 @@ UI.input.on('focus', function() {
 				} else {
 					if(val[0] == '/') {
 						fchat.parseArgs(val.substring(1, val.length - 1));
-					} else {
+					} else if (UI.currentBox._.channel) {
 						fclient.MSG(UI.currentBox._.channel, val);
+					} else {
+						fclient.PRI(UI.currentBox._.title, val);
 					}
 					UI.input.clearValue();
 					s.render();
@@ -299,7 +323,7 @@ function pushBuffer(buffer) {
 	return function(msg) {
 		buffer.pushLine(msg);
 		buffer.setScrollPerc(100);
-		s.render();
+//		s.render();
 	};
 }
 
@@ -307,7 +331,7 @@ UI.pushMessage = pushBuffer(UI.message);
 UI.pushDebug = pushBuffer(UI.debug);
 
 UI.pushChat = function(channel, character, message) {
-	var box = G.chats[channel];
+	var box = channel ? G.chats[channel] : G.character === character ? UI.currentBox._ : G.pms[character];
 	if(message.match(/^\/me/)) {
 		message = character + ' ' + message.substring(4);
 	} else {
@@ -343,5 +367,7 @@ UI.focusIndex = (function() {
 })();
 UI.input.focus();
 s.render();
+
+setInterval(function(){s.render();}, 100);
 
 module.exports = UI;

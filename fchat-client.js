@@ -44,6 +44,12 @@ CMD.MSG = prep(['channel', 'message'], function(args) {
 	UI.pushChat(args.channel, G.character, args.message);
 });
 
+CMD.PRI = prep(['recipient', 'message'], function(args) {
+	args.message = args.message.replace(/^:/,"/me ").slice(0,-1);
+	G.send('PRI', args);
+	UI.pushChat(null, G.character, args.message);
+});
+
 module.exports = CMD;
 
 setTimeout(function() {

@@ -5,6 +5,7 @@ var g = {};
 
 g.var = {};
 g.chats = {};
+g.pms = {};
 g.chatsArray = [];
 g.chatsIndex = 0;
 g.ws = null;

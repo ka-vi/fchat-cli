@@ -15,7 +15,7 @@ s.on('ERR', function(args) {
 s.on('JCH', function(args) {
 	if(G.character === args.character.identity && !G.chats[args.channel]) {
 		var box = UI.chatBox(args.channel, args.title);
-		UI.screen.append(box);
+	//	UI.screen.append(box);
 		UI.currentBox.hide();
 		UI.currentBox._.list.hide();
 		UI.currentBox = box;
@@ -30,6 +30,19 @@ s.on('JCH', function(args) {
 	}
 });
 
+s.on('PRI', function(args) {
+	if(!G.pms[args.character]) {
+		var box = UI.pmBox(args.character);
+		UI.currentBox.hide();
+		UI.currentBox._.list.hide();
+		UI.currentBox = box;
+		UI.focus = [UI.input, box._.list, box];
+		UI.focusIndex(0);
+		UI.input.focus();
+	}
+	UI.pushChat(null, args.character, args.message);
+});
+
 s.on('LCH', function(args) {
 	if(G.character === args.character) {
 
@@ -41,6 +54,7 @@ s.on('LCH', function(args) {
 });
 
 s.on('IDN', function(args) {
+	UI.pushMessage('Identified: ' + util.inspect(args));
 	G.character = args.character;
 	G.characterRegex = new RegExp(G.character,'ig');
 });

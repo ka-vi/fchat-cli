@@ -56,6 +56,9 @@ CMD.ERR = function(args) {
 CMD.ICH = function(args) {
 };
 
+CMD.PRI = function(args) {
+};
+
 for(var cmd in CMD) {
 	s.on(cmd, CMD[cmd]);
 }
