@@ -1,25 +1,24 @@
 var b = require('blessed')
   , p = b.program()
   , s = b.screen({
-	  dump: __dirname + '/ui.log'
+	dump: __dirname + '/ui.log'
+  ,	resizeTimeout: 1000
   })
   , fchat = require('./fchat')
   , fclient = require('./fchat-client')
   , fserver = require('./fchat-server')
   , G = require('./global')
   , util = require('util')
+  , fs = require('fs')
   ;
 
 var UI = {};
 
 p.showCursor();
 
-s.key(['C-c'], function(ch, key) {
-	return process.exit(0);
-});
+s.key('C-c', exit);
 
 s.key('tab', function(ch, key) {
-	UI.pushMessage('tab');
 	UI.focus[UI.focusIndex()].focus();
 });
 
@@ -31,9 +30,44 @@ s.key('C-p', function(ch, key) {
 	UI.prevChat();
 });
 
+s.key('C-z', function() {
+	s.sigtstp(function() {
+		/* continued */
+	});
+});
+
+s.key('C-d', function(ch, key) {
+	UI.debug.toggle();
+	s.render();
+});
+
+/*
 s.on('keypress', function(one, two) {
 
 });
+*/
+
+s.on('resize', function() {
+	UI.pushMessage('' + p.rows + ' ' + p.cols);
+	process.nextTick(function() {
+		s.clearRegion(0, p.cols, 0, p.rows);
+		s.render();
+	});
+});
+
+function exit(ch, key) {
+	var latchCount = G.chatsArray.length
+	  , exitLatch = function() {
+		  if(--latchCount <= 0) {
+			  process.exit(0);
+		  }
+	  }
+	  ;
+	G.chatsArray.forEach(function(chat) {
+		chat.log.on('finish', exitLatch);
+		chat.log.end();
+	});
+}
 
 UI.program = p;
 UI.screen = s;
@@ -42,8 +76,8 @@ UI.debug = b.text({
 	parent: s
 ,	top: 0
 ,	left: 0
-,	width: 45
-,	height: '100%'
+,	width: 40
+,	height: p.rows
 ,	content: 'Debug'
 ,	label: 'Debug'
 ,	tags: true
@@ -68,6 +102,10 @@ UI.debug = b.text({
 	}
 });
 
+UI.debug.on('resize', function() {
+	this.position.height = p.rows;
+});
+
 function binarySearch(a, s) {
 	var min = 0
 	  , mid = 0
@@ -79,7 +117,7 @@ function binarySearch(a, s) {
 		mid = min + Math.floor((max-min)/2);
 		cmp = a[mid].localeCompare(s);
 		if(cmp < 0) {
-			min = mid+1;
+			min = mid + 1;
 		} else if (cmp > 0) {
 			max = mid - 1;
 		} else {
@@ -90,12 +128,46 @@ function binarySearch(a, s) {
 	return min;
 }
 
+UI.windowList = b.list({
+	parent: s
+,	top: 0
+,	left: 0
+,	width: 40
+,	height: p.rows
+,	label: 'Window List'
+,	scrollable: true
+,	border: {
+		type: 'line'
+	}
+,	scrollbar: {
+		ch: ' '
+	}
+,	style: {
+		fg: 'white'
+	,	bg: 'black'
+	,	border: {
+			fg: 'white'
+		}
+	,	scrollbar: {
+			inverse: true
+		}
+	,	selected: {
+			fg: 'black'
+		,	bg: 'green'
+		}
+	}
+});
+
+UI.windowList.on('resize', function() {
+	this.position.height = p.rows;
+});
+
 UI.userList = function() {
 	var list = b.list({
 		parent: s
 	,	top: 0
-	,	left: (p.cols - 45)
-	,	width: 45
+	,	left: (p.cols - 40)
+	,	width: 40
 	,	height: (p.rows - 6)
 	,	label: 'Users'
 	,	scrollable: true
@@ -136,9 +208,15 @@ UI.userList = function() {
 	};
 	list._.remove = function(item) {
 		var i = binarySearch(list._.arr, item);
-		list._.arr.splice(i, 1);
-		list.setItems(list._.arr);
+		if(list._.arr[i] === item) {
+			list._.arr.splice(i, 1);
+			list.setItems(list._.arr);
+		}
 	};
+	list.on('resize', function() {
+		this.position.height = p.rows - 6;
+		this.position.left = p.cols - 40;
+	});
 	return list;
 }
 
@@ -146,8 +224,8 @@ UI.baseBox = function(title) {
 	var box = b.text({
 		parent: s
 	,	top: 0
-	,	left: 45
-	,	width: (p.cols - 90)
+	,	left: 40
+	,	width: (p.cols - 80)
 	,	height: (p.rows - 6)
 	,	content: 'The opening\nmessage'
 	,	label: title
@@ -162,7 +240,7 @@ UI.baseBox = function(title) {
 			ch: ' '
 		}
 	,	style: {
-			fg: 'white'
+			fg: '#FFFFFF'
 		,	bg: 'black'
 		,	border: {
 				fg: 'white'
@@ -172,34 +250,56 @@ UI.baseBox = function(title) {
 			}
 		}
 	});
+	box.on('resize', function() {
+		this.position.height = p.rows - 6;
+		this.position.width = p.cols - 80;
+	});
 	return box;
 };
 
 UI.chatBox = function(channel, title) {
-	var box = UI.baseBox(title);
+	var box = UI.baseBox(title)
+	  , d = new Date(Date.now())
+	  , date = d.getDate()
+	  , month = d.getMonth() + 1
+	  , year = d.getFullYear()
+	  , file = util.format('logs/%s.%s.%s.%s-%s-%s.log', G.character, channel, title, year, month < 10 ? '0' + month : month, date < 10 ? '0' + date : date)
+	  ;
 	box._ = G.chats[channel] = {
 		channel: channel
 	,	title: title
 	,	box: box
 	,	list: UI.userList()
 	,	pushChat: pushBuffer(box)
+	,	log: fs.createWriteStream(file, {flags: 'a', encoding: 'utf8', mode: 0666})
 	};
 	G.chatsArray.push(G.chats[channel]);
 	G.chatsIndex = G.chatsArray.length - 1;
+	UI.windowList.add(title);
+	UI.windowList.select(G.chatsIndex);
 	return box;
 };
 
 UI.pmBox = function(character) {
-	var box = UI.baseBox(character);
+	var box = UI.baseBox(character)
+	  , d = new Date(Date.now())
+	  , date = d.getDate()
+	  , month = d.getMonth() + 1
+	  , year = d.getFullYear()
+	  , file = util.format('logs/%s.%s.%s-%s-%s.log', G.character, character, year, month < 10 ? '0' + month : month, date < 10 ? '0' + date : date)
+	  ;
 	box._ = G.pms[character] = {
 		channel: null
 	,	title: character
 	,	box: box
 	,	list: UI.userList()
 	,	pushChat: pushBuffer(box)
+	,	log: fs.createWriteStream(file, {flags: 'a', encoding: 'utf8', mode: 0666})
 	};
 	G.chatsArray.push(G.pms[character]);
 	G.chatsIndex = G.chatsArray.length - 1;
+	UI.windowList.add(character);
+	UI.windowList.select(G.chatsIndex);
 	return box;
 };
 
@@ -208,8 +308,8 @@ UI.message = UI.chatBox('_main', 'Main Window');
 UI.input = b.textarea({
 	parent: s
 ,	top: (p.rows - 6)
-,	left: 45
-,	width: 100
+,	left: 40
+,	width: (p.cols - 40)
 ,	height: 6
 ,	label: 'Input'
 ,	tags: true
@@ -234,10 +334,22 @@ UI.input.key('enter', function(ch, key) {
 	}
 });
 
+UI.input.key('C-z', function() {
+	s.sigtstp(function() {
+		/* continued */
+	});
+});
+
+UI.input.on('resize', function() {
+	this.position.top = p.rows - 6;
+	this.position.width = p.cols - 40;
+});
+
 UI.prevChat = function() {
 	UI.currentBox.hide();
 	UI.currentBox._.list.hide();
 	G.chatsIndex = (G.chatsIndex + G.chatsArray.length - 1) % G.chatsArray.length;
+	UI.windowList.select(G.chatsIndex);
 	var box = G.chatsArray[G.chatsIndex];
 	box.box.show();
 	box.list.show();
@@ -252,6 +364,7 @@ UI.nextChat = function() {
 	UI.currentBox.hide();
 	UI.currentBox._.list.hide();
 	G.chatsIndex = (G.chatsIndex + 1) % G.chatsArray.length;
+	UI.windowList.select(G.chatsIndex);
 	var box = G.chatsArray[G.chatsIndex];
 	box.box.show();
 	box.list.show();
@@ -270,9 +383,7 @@ UI.input.key('C-p', function(ch, key) {
 	UI.prevChat();
 });
 
-UI.input.key('C-c', function(ch, key) {
-	return process.exit(0);
-});
+UI.input.key('C-c', exit);
 
 UI.input.key('tab', function(ch, key) {
 	if(UI.input._done) {
@@ -323,7 +434,7 @@ function pushBuffer(buffer) {
 	return function(msg) {
 		buffer.pushLine(msg);
 		buffer.setScrollPerc(100);
-//		s.render();
+		s.render();
 	};
 }
 
@@ -337,6 +448,7 @@ UI.pushChat = function(channel, character, message) {
 	} else {
 		message = character + ': ' + message;
 	}
+	box.log.write(message + '\n');
 	message = message.replace(G.characterRegex, '{yellow-fg}$&{/}');
 	box.pushChat(message);
 }
@@ -368,6 +480,8 @@ UI.focusIndex = (function() {
 UI.input.focus();
 s.render();
 
-setInterval(function(){s.render();}, 100);
+UI.pushMessage('' + p.rows + ' ' + p.cols);
+
+//setInterval(function(){s.render();}, 100);
 
 module.exports = UI;

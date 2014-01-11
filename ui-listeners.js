@@ -15,7 +15,6 @@ s.on('ERR', function(args) {
 s.on('JCH', function(args) {
 	if(G.character === args.character.identity && !G.chats[args.channel]) {
 		var box = UI.chatBox(args.channel, args.title);
-	//	UI.screen.append(box);
 		UI.currentBox.hide();
 		UI.currentBox._.list.hide();
 		UI.currentBox = box;
@@ -49,6 +48,17 @@ s.on('LCH', function(args) {
 	} else {
 		var ch = G.chats[args.channel];
 		ch.list._.remove(args.character);
+		UI.screen.render();
+	}
+});
+
+s.on('FLN', function(args) {
+	if(G.character === args.character) {
+		
+	} else {
+		for(var chat in G.chats) {
+			G.chats[chat].list._.remove(args.character);
+		}
 		UI.screen.render();
 	}
 });

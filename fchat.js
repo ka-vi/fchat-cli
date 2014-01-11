@@ -1,7 +1,7 @@
 var WebSocket = require('ws')
   , needle = require('needle')
   , util = require('util')
-  , ws = new WebSocket('ws://chat.f-list.net:9722')
+  , ws = new WebSocket('ws://chat.f-list.net:8722')
   , fserver = require('./fchat-server')
   , fclient = require('./fchat-client')
   , G = require('./global')
@@ -78,8 +78,12 @@ function split(str, ch, limit) {
 module.exports.parseArgs = function(str) {
 	var cmd = str.substring(0,3);
 	if(fclient[cmd]) {
-		var sp = split(str, ' ', fclient[cmd].args.length);
-		sp.shift();
-		fclient[cmd].apply(null, sp);
+		if(fclient[cmd].args) {
+			var sp = split(str, ' ', fclient[cmd].args.length);
+			sp.shift();
+			fclient[cmd].apply(null, sp);
+		} else {
+			fclient[cmd]();
+		}
 	}
 };

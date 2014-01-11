@@ -6,6 +6,8 @@ config.js
 # Filetypes
 *.swp
 .*.swp
+*.log
 
 # Paths
 /node_modules
+/logs

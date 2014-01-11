@@ -54,4 +54,4 @@ module.exports = CMD;
 
 setTimeout(function() {
 	UI = require('./ui');
-}, 1000);
+}, 500);
