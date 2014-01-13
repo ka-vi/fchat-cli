@@ -354,6 +354,7 @@ UI.chatBox = function(channel, title) {
 	,	list: UI.userList()
 	,	pushChat: pushBuffer(box)
 	,	log: fs.createWriteStream(file, {flags: 'a', encoding: 'utf8', mode: 0666})
+	,	unread: 0
 	};
 	G.chatsArray.push(G.chats[channel]);
 	G.chatsIndex = G.chatsArray.length - 1;
@@ -379,6 +380,7 @@ UI.pmBox = function(character) {
 	,	list: UI.userList()
 	,	pushChat: pushBuffer(box)
 	,	log: fs.createWriteStream(file, {flags: 'a', encoding: 'utf8', mode: 0666})
+	,	unread: 0
 	};
 	G.chatsArray.push(G.pms[character]);
 //	G.chatsIndex = G.chatsArray.length - 1;
@@ -437,6 +439,7 @@ UI.prevChat = function() {
 	G.chatsIndex = (G.chatsIndex + G.chatsArray.length - 1) % G.chatsArray.length;
 	UI.windowList.select(G.chatsIndex);
 	var box = G.chatsArray[G.chatsIndex];
+	box.unread = 0;
 	box.box.show();
 	box.list.show();
 	UI.currentBox = box.box;
@@ -453,6 +456,7 @@ UI.nextChat = function() {
 	G.chatsIndex = (G.chatsIndex + 1) % G.chatsArray.length;
 	UI.windowList.select(G.chatsIndex);
 	var box = G.chatsArray[G.chatsIndex];
+	box.unread = 0;
 	box.box.show();
 	box.list.show();
 	UI.currentBox = box.box;
@@ -545,7 +549,7 @@ UI.pushChat = function(channel, character, message) {
 	if(box.box !== UI.currentBox) {
 		var ri = binarySearch(UI.windowList.ritems, box.title, windowListComparator);
 		var i = UI.windowList.ritems[ri][1];
-		UI.windowList.items[i].setContent('{red-fg}' + UI.windowList.ritems[ri][0] + '{/}');
+		UI.windowList.items[i].setContent('{red-fg}' + UI.windowList.ritems[ri][0] + ' (' + (++box.unread) + '){/}');
 	}
 	box.pushChat(message);
 }
