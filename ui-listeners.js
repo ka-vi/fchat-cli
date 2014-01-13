@@ -86,3 +86,13 @@ s.on('CHA', function(args) {
 	UI.channelList.focus();
 	UI.screen.render();
 });
+
+s.on('ORS', function(args) {
+	UI.channelList._.pri = true;
+	UI.channelList._.channels = args.channels;
+	UI.channelList._.display = args.channels.slice();
+	UI.channelList._.setAndSort(args);
+	UI.channelList.show();
+	UI.channelList.focus();
+	UI.screen.render();
+});

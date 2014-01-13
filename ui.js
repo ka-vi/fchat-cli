@@ -180,12 +180,20 @@ UI.channelList = UI.leftList('Channel List');
 UI.channelList.hide();
 UI.channelList._.sorts = [
 	function(a, b) {
-		return a.name.localeCompare(b.name);
+		if(UI.channelList._.pri) {
+			return a.title.localeCompare(b.title);
+		} else {
+			return a.name.localeCompare(b.name);
+		}
 	}
 ,	function(a, b) {
 		var diff = b.characters - a.characters;
 		if(diff === 0) {
-			diff = a.name.localeCompare(b.name);
+			if(UI.channelList._.pri) {
+				diff = a.title.localeCompare(b.title);
+			} else {
+				diff = a.name.localeCompare(b.name);
+			}
 		}
 		return diff;
 	}
@@ -198,7 +206,7 @@ UI.channelList._.setAndSort = function(args) {
 
 UI.channelList._.render = function() {
 	UI.channelList.setItems(UI.channelList._.display.map(function(item) {
-		return item.name + ' (' + item.characters + ')';
+		return (UI.channelList._.pri ? item.title : item.name) + ' (' + item.characters + ')';
 	}));
 };
 
