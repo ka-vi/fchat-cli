@@ -33,6 +33,10 @@ CMD.CHA = function() {
 	G.send('CHA');
 };
 
+CMD.ORS = function() {
+	G.send('ORS');
+};
+
 CMD.JCH = prep(['channel'], function(args) {
 	UI.pushMessage(util.inspect(args));
 	G.send('JCH', args);

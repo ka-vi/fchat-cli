@@ -1,7 +1,7 @@
 var WebSocket = require('ws')
   , needle = require('needle')
   , util = require('util')
-  , ws = new WebSocket('ws://chat.f-list.net:8722')
+  , ws = new WebSocket('ws://chat.f-list.net:9722')
   , fserver = require('./fchat-server')
   , fclient = require('./fchat-client')
   , G = require('./global')

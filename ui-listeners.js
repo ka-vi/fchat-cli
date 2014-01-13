@@ -77,3 +77,12 @@ s.on('ICH', function(args) {
 	ch.list.setItems(ch.list._.arr);
 	UI.screen.render();
 });
+
+s.on('CHA', function(args) {
+	UI.channelList._.channels = args.channels;
+	UI.channelList._.display = args.channels.slice();
+	UI.channelList._.setAndSort(args);
+	UI.channelList.show();
+	UI.channelList.focus();
+	UI.screen.render();
+});

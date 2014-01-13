@@ -128,38 +128,107 @@ function binarySearch(a, s) {
 	return min;
 }
 
-UI.windowList = b.list({
-	parent: s
-,	top: 0
-,	left: 0
-,	width: 40
-,	height: p.rows
-,	label: 'Window List'
-,	scrollable: true
-,	border: {
-		type: 'line'
-	}
-,	scrollbar: {
-		ch: ' '
-	}
-,	style: {
-		fg: 'white'
-	,	bg: 'black'
+UI.leftList = function(title) {
+	var list = b.list({
+		parent: s
+	,	top: 0
+	,	left: 0
+	,	width: 40
+	,	height: p.rows
+	,	label: title
+	,	scrollable: true
 	,	border: {
-			fg: 'white'
+			type: 'line'
 		}
 	,	scrollbar: {
-			inverse: true
+			ch: ' '
 		}
-	,	selected: {
-			fg: 'black'
-		,	bg: 'green'
+	,	style: {
+			fg: 'white'
+		,	bg: 'black'
+		,	border: {
+				fg: 'white'
+			}
+		,	scrollbar: {
+				inverse: true
+			}
+		,	selected: {
+				fg: 'black'
+			,	bg: 'green'
+			}
 		}
-	}
-});
+	});
+	list.key('up', function(ch, key) {
+		list.up(1);
+		s.render();
+	});
+	list.key('down', function(ch, key) {
+		list.down(1);
+		s.render();
+	});
+	return list;
+};
+
+
+UI.windowList = UI.leftList('Window List');
 
 UI.windowList.on('resize', function() {
 	this.position.height = p.rows;
+});
+
+UI.channelList = UI.leftList('Channel List');
+UI.channelList.hide();
+UI.channelList._.sorts = [
+	function(a, b) {
+		return a.name.localeCompare(b.name);
+	}
+,	function(a, b) {
+		var diff = b.characters - a.characters;
+		if(diff === 0) {
+			diff = a.name.localeCompare(b.name);
+		}
+		return diff;
+	}
+];
+UI.channelList._.hideEmpty = false;
+UI.channelList._.setAndSort = function(args) {
+	UI.channelList._.display.sort(UI.channelList._.sorts[1]);
+	UI.channelList._.render();
+};
+
+UI.channelList._.render = function() {
+	UI.channelList.setItems(UI.channelList._.display.map(function(item) {
+		return item.name + ' (' + item.characters + ')';
+	}));
+};
+
+UI.channelList.key('enter', function(ch, key) {
+	fclient.JCH(this._.display[this.selected].name);
+	this.hide();
+	UI.input.focus();
+	s.render();
+});
+
+UI.channelList.key('C-s', function(ch, key) {
+	var sort = this._.sorts.shift();
+	this._.display = this._.channels.slice();
+	this._.display.sort(sort);
+	this._.render();
+	this._.sorts.push(sort);
+	s.render();
+});
+
+UI.channelList.key('C-e', function(ch, key) {
+	if(!this._.hideEmpty) {
+		this._.display = this._.channels.slice().sort(this._.sorts[1]).filter(function(item) {
+			return item.characters > 0;
+		});
+	} else {
+		this._.display = this._.channels.slice().sort(this._.sorts[1]);
+	}
+	this._.hideEmpty = !this._.hideEmpty;
+	this._.render();
+	s.render();
 });
 
 UI.userList = function() {
