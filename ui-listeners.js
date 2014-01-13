@@ -32,12 +32,15 @@ s.on('JCH', function(args) {
 s.on('PRI', function(args) {
 	if(!G.pms[args.character]) {
 		var box = UI.pmBox(args.character);
+		box.hide();
+		/*
 		UI.currentBox.hide();
 		UI.currentBox._.list.hide();
 		UI.currentBox = box;
 		UI.focus = [UI.input, box._.list, box];
 		UI.focusIndex(0);
 		UI.input.focus();
+		*/
 	}
 	UI.pushChat(null, args.character, args.message);
 });
@@ -79,6 +82,7 @@ s.on('ICH', function(args) {
 });
 
 s.on('CHA', function(args) {
+	UI.channelList._.pri = false;
 	UI.channelList._.channels = args.channels;
 	UI.channelList._.display = args.channels.slice();
 	UI.channelList._.setAndSort(args);

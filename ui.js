@@ -48,7 +48,6 @@ s.on('keypress', function(one, two) {
 */
 
 s.on('resize', function() {
-	UI.pushMessage('' + p.rows + ' ' + p.cols);
 	process.nextTick(function() {
 		s.clearRegion(0, p.cols, 0, p.rows);
 		s.render();
@@ -106,16 +105,22 @@ UI.debug.on('resize', function() {
 	this.position.height = p.rows;
 });
 
-function binarySearch(a, s) {
+function defaultComparator(a, b) {
+	return a.localeCompare(b);
+}
+
+function binarySearch(a, s, c) {
 	var min = 0
 	  , mid = 0
 	  , max = a.length - 1
 	  , cmp = 0
 	  ;
+
+	c = c || defaultComparator;
 	
 	while(min <= max) {
 		mid = min + Math.floor((max-min)/2);
-		cmp = a[mid].localeCompare(s);
+		cmp =  c(a[mid], s);
 		if(cmp < 0) {
 			min = mid + 1;
 		} else if (cmp > 0) {
@@ -137,6 +142,7 @@ UI.leftList = function(title) {
 	,	height: p.rows
 	,	label: title
 	,	scrollable: true
+	,	tags: true
 	,	border: {
 			type: 'line'
 		}
@@ -171,7 +177,6 @@ UI.leftList = function(title) {
 
 
 UI.windowList = UI.leftList('Window List');
-
 UI.windowList.on('resize', function() {
 	this.position.height = p.rows;
 });
@@ -353,6 +358,8 @@ UI.chatBox = function(channel, title) {
 	G.chatsArray.push(G.chats[channel]);
 	G.chatsIndex = G.chatsArray.length - 1;
 	UI.windowList.add(title);
+	UI.windowList.ritems.push([title, UI.windowList.ritems.length]);
+	UI.windowList.ritems.sort(windowListComparator);
 	UI.windowList.select(G.chatsIndex);
 	return box;
 };
@@ -374,9 +381,11 @@ UI.pmBox = function(character) {
 	,	log: fs.createWriteStream(file, {flags: 'a', encoding: 'utf8', mode: 0666})
 	};
 	G.chatsArray.push(G.pms[character]);
-	G.chatsIndex = G.chatsArray.length - 1;
+//	G.chatsIndex = G.chatsArray.length - 1;
 	UI.windowList.add(character);
-	UI.windowList.select(G.chatsIndex);
+	UI.windowList.ritems.push([character, UI.windowList.ritems.length]);
+	UI.windowList.ritems.sort(windowListComparator);
+//	UI.windowList.select(G.chatsIndex);
 	return box;
 };
 
@@ -431,6 +440,7 @@ UI.prevChat = function() {
 	box.box.show();
 	box.list.show();
 	UI.currentBox = box.box;
+	UI.windowList.items[G.chatsIndex].setContent(UI.windowList.ritems[UI.windowList.ritems[G.chatsIndex][1]][0]);
 	UI.focus = [UI.input, box.list, box.box];
 	UI.focusIndex(0);
 	UI.input.focus();
@@ -446,6 +456,7 @@ UI.nextChat = function() {
 	box.box.show();
 	box.list.show();
 	UI.currentBox = box.box;
+	UI.windowList.items[G.chatsIndex].setContent(UI.windowList.ritems[UI.windowList.ritems[G.chatsIndex][1]][0]);
 	UI.focus = [UI.input, box.list, box.box];
 	UI.focusIndex(0);
 	UI.input.focus();
@@ -518,6 +529,10 @@ function pushBuffer(buffer) {
 UI.pushMessage = pushBuffer(UI.message);
 UI.pushDebug = pushBuffer(UI.debug);
 
+function windowListComparator(a, b) {
+	return defaultComparator(a[0], b[0]);
+}
+
 UI.pushChat = function(channel, character, message) {
 	var box = channel ? G.chats[channel] : G.character === character ? UI.currentBox._ : G.pms[character];
 	if(message.match(/^\/me/)) {
@@ -527,6 +542,11 @@ UI.pushChat = function(channel, character, message) {
 	}
 	box.log.write(message + '\n');
 	message = message.replace(G.characterRegex, '{yellow-fg}$&{/}');
+	if(box.box !== UI.currentBox) {
+		var ri = binarySearch(UI.windowList.ritems, box.title, windowListComparator);
+		var i = UI.windowList.ritems[ri][1];
+		UI.windowList.items[i].setContent('{red-fg}' + UI.windowList.ritems[ri][0] + '{/}');
+	}
 	box.pushChat(message);
 }
 

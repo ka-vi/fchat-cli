@@ -11,10 +11,13 @@ var WebSocket = require('ws')
 
 function send(str, obj) {
 	if(obj) {
-		ws.send(str + ' ' + JSON.stringify(obj));
-	} else {
-		ws.send(str);
+		str += ' ' + JSON.stringify(obj);
 	}
+	ws.send(str, function(err) {
+		if(err) {
+			UI.pushMessage(util.inspect(err));
+		}
+	});
 }
 
 G.send = send;
