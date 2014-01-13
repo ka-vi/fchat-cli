@@ -180,6 +180,11 @@ UI.windowList = UI.leftList('Window List');
 UI.windowList.on('resize', function() {
 	this.position.height = p.rows;
 });
+UI.windowList.key('esc', function() {
+	this.hide();
+	UI.input.focus();
+	s.render();
+});
 
 UI.channelList = UI.leftList('Channel List');
 UI.channelList.hide();
@@ -359,6 +364,7 @@ UI.chatBox = function(channel, title) {
 	G.chatsArray.push(G.chats[channel]);
 	G.chatsIndex = G.chatsArray.length - 1;
 	UI.windowList.add(title);
+	UI.windowList.items[G.chatsIndex]._.original = title;
 	UI.windowList.ritems.push([title, UI.windowList.ritems.length]);
 	UI.windowList.ritems.sort(windowListComparator);
 	UI.windowList.select(G.chatsIndex);
@@ -385,6 +391,7 @@ UI.pmBox = function(character) {
 	G.chatsArray.push(G.pms[character]);
 //	G.chatsIndex = G.chatsArray.length - 1;
 	UI.windowList.add(character);
+	UI.windowList.items[G.chatsArray.length - 1]._.original = title;
 	UI.windowList.ritems.push([character, UI.windowList.ritems.length]);
 	UI.windowList.ritems.sort(windowListComparator);
 //	UI.windowList.select(G.chatsIndex);
@@ -443,7 +450,7 @@ UI.prevChat = function() {
 	box.box.show();
 	box.list.show();
 	UI.currentBox = box.box;
-	UI.windowList.items[G.chatsIndex].setContent(UI.windowList.ritems[UI.windowList.ritems[G.chatsIndex][1]][0]);
+	UI.windowList.items[G.chatsIndex].setContent(UI.windowList.items[G.chatsIndex]._.original);
 	UI.focus = [UI.input, box.list, box.box];
 	UI.focusIndex(0);
 	UI.input.focus();
@@ -460,7 +467,7 @@ UI.nextChat = function() {
 	box.box.show();
 	box.list.show();
 	UI.currentBox = box.box;
-	UI.windowList.items[G.chatsIndex].setContent(UI.windowList.ritems[UI.windowList.ritems[G.chatsIndex][1]][0]);
+	UI.windowList.items[G.chatsIndex].setContent(UI.windowList.items[G.chatsIndex]._.original);
 	UI.focus = [UI.input, box.list, box.box];
 	UI.focusIndex(0);
 	UI.input.focus();
