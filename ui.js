@@ -11,6 +11,7 @@ var b = require('blessed')
   , util = require('util')
   , fs = require('fs')
   , config = require('./config')
+  , sanitize = require('sanitize-filename')
   ;
 
 var UI = {};
@@ -172,6 +173,9 @@ UI.leftList = function(title) {
 	list.key('down', function(ch, key) {
 		list.down(1);
 		s.render();
+	});
+	list.on('resize', function() {
+		this.position.height = p.rows;
 	});
 	return list;
 };
@@ -351,7 +355,7 @@ UI.chatBox = function(channel, title) {
 	  , date = d.getDate()
 	  , month = d.getMonth() + 1
 	  , year = d.getFullYear()
-	  , file = util.format('logs/%s.%s.%s.%s-%s-%s.log', G.character, channel, title, year, month < 10 ? '0' + month : month, date < 10 ? '0' + date : date)
+	  , file = util.format('logs/%s.%s.%s.%s-%s-%s.log', G.character, sanitize(title), channel, year, month < 10 ? '0' + month : month, date < 10 ? '0' + date : date)
 	  ;
 	box._ = G.chats[channel] = {
 		channel: channel
@@ -539,7 +543,17 @@ function pushBuffer(buffer) {
 	};
 }
 
-UI.pushMessage = pushBuffer(UI.message);
+UI.pushMessage = (function(push) {
+	return function(msg) {
+		if(UI.currentBox !== UI.message) {
+			var ri = binarySearch(UI.windowList.ritems, UI.message._.title, windowListComparator);
+			var i = UI.windowList.ritems[ri][1];
+			UI.windowList.items[i].setContent('{red-fg}' + UI.windowList.ritems[ri][0] + ' (' + (++UI.message._.unread) + '){/}');
+		}
+		push(msg);
+	};
+})(pushBuffer(UI.message));
+
 UI.pushDebug = pushBuffer(UI.debug);
 
 function windowListComparator(a, b) {

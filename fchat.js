@@ -52,6 +52,7 @@ ws.on('open', function() {
 });
 
 ws.on('message', function(msg) {
+	msg = stripUtf8(msg);
 	var cmd = msg.substring(0,3);
 	var json = {};
 	try {
@@ -61,6 +62,11 @@ ws.on('message', function(msg) {
 	}
 	G.server.emit(cmd, json);
 });
+
+function stripUtf8(str) {
+	//return str.replace(/[\uE000-\uF8FF]/g, '?');
+	return str.replace(/[^\x00-\x80]/g, '?');
+}
 
 function split(str, ch, limit) {
 	var count = 0
