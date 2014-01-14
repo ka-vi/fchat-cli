@@ -13,6 +13,7 @@ g.send = null;
 g.server = new EventEmitter();
 g.character = null;
 g.characterRegex = null;
+g.maxBuffer = 500;
 
 g.CON = -1;
 

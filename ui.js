@@ -10,6 +10,7 @@ var b = require('blessed')
   , G = require('./global')
   , util = require('util')
   , fs = require('fs')
+  , config = require('./config')
   ;
 
 var UI = {};
@@ -389,12 +390,10 @@ UI.pmBox = function(character) {
 	,	unread: 0
 	};
 	G.chatsArray.push(G.pms[character]);
-//	G.chatsIndex = G.chatsArray.length - 1;
 	UI.windowList.add(character);
 	UI.windowList.items[G.chatsArray.length - 1]._.original = title;
 	UI.windowList.ritems.push([character, UI.windowList.ritems.length]);
 	UI.windowList.ritems.sort(windowListComparator);
-//	UI.windowList.select(G.chatsIndex);
 	return box;
 };
 
@@ -532,6 +531,9 @@ UI.input.on('submit', function() {
 function pushBuffer(buffer) {
 	return function(msg) {
 		buffer.pushLine(msg);
+		if(buffer._clines.fake.length > (config.maxBuffer || G.maxBuffer)) {
+			buffer.shiftLine(1);
+		}
 		buffer.setScrollPerc(100);
 		s.render();
 	};

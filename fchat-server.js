@@ -50,6 +50,9 @@ CMD.LCH = function(args) {
 CMD.MSG = function(args) {
 };
 
+CMD.LRP = function(args) {
+};
+
 CMD.ERR = function(args) {
 };
 

@@ -8,6 +8,10 @@ s.on('MSG', function(args) {
 	UI.pushChat(args.channel, args.character, args.message);
 });
 
+s.on('LRP', function(args) {
+	UI.pushChat(args.channel, args.character, '{cyan-fg}' + args.message + '{/}');
+});
+
 s.on('ERR', function(args) {
 	UI.pushMessage('{red-fg}Error ' + args.number + ': ' + args.message + '{/}');
 });
