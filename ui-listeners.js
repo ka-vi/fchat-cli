@@ -37,6 +37,7 @@ s.on('PRI', function(args) {
 	if(!G.pms[args.character]) {
 		var box = UI.pmBox(args.character);
 		box.hide();
+		box._.list.hide();
 		/*
 		UI.currentBox.hide();
 		UI.currentBox._.list.hide();
