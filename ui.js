@@ -395,7 +395,7 @@ UI.pmBox = function(character) {
 	};
 	G.chatsArray.push(G.pms[character]);
 	UI.windowList.add(character);
-	UI.windowList.items[G.chatsArray.length - 1]._.original = title;
+	UI.windowList.items[G.chatsArray.length - 1]._.original = character;
 	UI.windowList.ritems.push([character, UI.windowList.ritems.length]);
 	UI.windowList.ritems.sort(windowListComparator);
 	return box;
