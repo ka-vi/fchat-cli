@@ -1,6 +1,8 @@
 var WebSocket = require('ws')
   , needle = require('needle')
   , util = require('util')
+  , Entities = require('html-entities').AllHtmlEntities
+  , htmlEntities = new Entities()
   , ws = new WebSocket('ws://chat.f-list.net:9722')
   , fserver = require('./fchat-server')
   , fclient = require('./fchat-client')
@@ -25,6 +27,17 @@ G.ws = ws;
 
 ws.on('close', function() {
 	UI.pushMessage('Closed!');
+	process.nextTick(function() {
+		UI.pushMessage('Trying to reconnect...');
+		send('IDN', {
+			method: 'ticket'
+		,	account: config.account
+		,	ticket: body.ticket
+		,	character: config.character
+		,	cname: 'Node.js F-Chat Client'
+		,	cversion: '0.0.1'
+		});
+	});
 });
 
 ws.on('open', function() {
@@ -52,6 +65,7 @@ ws.on('open', function() {
 });
 
 ws.on('message', function(msg) {
+	msg = htmlEntities.decode(msg);
 	msg = stripUtf8(msg);
 	var cmd = msg.substring(0,3);
 	var json = {};

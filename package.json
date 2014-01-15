@@ -16,6 +16,7 @@
     "ws": "~0.4.31",
     "needle": "~0.6.3",
     "blessed": "0.0.26",
-    "sanitize-filename": "~1.0.1"
+    "sanitize-filename": "~1.0.1",
+    "html-entities": "~1.0.10"
   }
 }

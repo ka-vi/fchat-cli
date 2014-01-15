@@ -546,7 +546,7 @@ function pushBuffer(buffer) {
 UI.pushMessage = (function(push) {
 	return function(msg) {
 		if(UI.currentBox !== UI.message) {
-			var ri = binarySearch(UI.windowList.ritems, UI.message._.title, windowListComparator);
+			var ri = binarySearch(UI.windowList.ritems, UI.message._.title, unreadComparator);
 			var i = UI.windowList.ritems[ri][1];
 			UI.windowList.items[i].setContent('{red-fg}' + UI.windowList.ritems[ri][0] + ' (' + (++UI.message._.unread) + '){/}');
 		}
@@ -560,6 +560,10 @@ function windowListComparator(a, b) {
 	return defaultComparator(a[0], b[0]);
 }
 
+function unreadComparator(a, b) {
+	return defaultComparator(a[0], b);
+}
+
 UI.pushChat = function(channel, character, message) {
 	var box = channel ? G.chats[channel] : G.character === character ? UI.currentBox._ : G.pms[character];
 	if(message.match(/^\/me/)) {
@@ -570,7 +574,7 @@ UI.pushChat = function(channel, character, message) {
 	box.log.write(message + '\n');
 	message = message.replace(G.characterRegex, '{yellow-fg}$&{/}');
 	if(box.box !== UI.currentBox) {
-		var ri = binarySearch(UI.windowList.ritems, box.title, windowListComparator);
+		var ri = binarySearch(UI.windowList.ritems, box.title, unreadComparator);
 		var i = UI.windowList.ritems[ri][1];
 		UI.windowList.items[i].setContent('{red-fg}' + UI.windowList.ritems[ri][0] + ' (' + (++box.unread) + '){/}');
 	}
