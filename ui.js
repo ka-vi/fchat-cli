@@ -177,9 +177,11 @@ UI.leftList = function(title) {
 	});
 	list.key('pageup', function(ch, key) {
 		list.up(p.rows - 2);
+		s.render();
 	});
 	list.key('pagedown', function(ch, key) {
 		list.down(p.rows - 2);
+		s.render();
 	});
 	list.on('resize', function() {
 		this.position.height = p.rows;
@@ -192,13 +194,13 @@ UI.windowList = UI.leftList('Window List');
 UI.windowList.on('resize', function() {
 	this.position.height = p.rows;
 });
-UI.windowList.key('esc', function() {
+
+UI.channelList = UI.leftList('Channel List');
+UI.channelList.key('escape', function() {
 	this.hide();
 	UI.input.focus();
 	s.render();
 });
-
-UI.channelList = UI.leftList('Channel List');
 UI.channelList.hide();
 UI.channelList._.sorts = [
 	function(a, b) {
@@ -297,6 +299,14 @@ UI.userList = function() {
 	});
 	list.key('down', function(ch, key) {
 		list.down(1);
+		s.render();
+	});
+	list.key('pageup', function(ch, key) {
+		list.up(p.rows - 9);
+		s.render();
+	});
+	list.key('pagedown', function(ch, key) {
+		list.down(p.rows - 9);
 		s.render();
 	});
 	list._.arr = [];
@@ -482,26 +492,34 @@ UI.input.key('pagedown', function() {
 
 UI.input.key('up', function() {
 	var value = this.getValue();
+	// If we're up in the history but have made an edit, reset
 	if(this._.historyIndex < this._.history.length && this._.history[this._.historyIndex] !== value) {
 		this._.history.pop(); 
 		this._.historyIndex = this._.history.length;
 	}
+	// If we're fresh, add our current text to the history to save it
 	if(this._.historyIndex === this._.history.length) {
 		this._.history.push(value);
 	}
+	// Regular going up in history stuff
 	var index = this._.historyIndex === 0 ? 0 : --this._.historyIndex;
 	this.setValue(this._.history[index]);
 	s.render();
 });
 
 UI.input.key('down', function() {
+	// We're at starting state
 	if(this._.historyIndex === this._.history.length) {
 		return;
-	} else if(this._.history[this._.historyIndex] !== this.getValue()) {
+	}
+	// We're somewhere up in the history but our input has changed, time to reset
+	else if(this._.history[this._.historyIndex] !== this.getValue()) {
 		this._.history.pop();
 		this._.historyIndex = this._.history.length;
 		return;
-	} else {
+	}
+	// Do regular going down in history stuff
+	else {
 		var index = this._.historyIndex === (this._.history.length - 1) ? this._.historyIndex : ++this._.historyIndex;
 		this.setValue(this._.history[index]);
 		s.render();
