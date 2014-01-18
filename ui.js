@@ -447,6 +447,9 @@ UI.input = b.textarea({
 	}
 });
 
+UI.input._.history = [];
+UI.input._.historyIndex = 0;
+
 UI.input.key('enter', function(ch, key) {
 	if(UI.input._done) {
 		UI.input._done(null, UI.input.value);
@@ -473,8 +476,32 @@ UI.input.key('pagedown', function() {
 	s.render();
 });
 
-UI.input.key('C-l', function() {
-	UI.pushMessage('' + Math.random());
+UI.input.key('up', function() {
+	var value = this.getValue();
+	if(this._.historyIndex < this._.history.length && this._.history[this._.historyIndex] !== value) {
+		this._.history.pop(); 
+		this._.historyIndex = this._.history.length;
+	}
+	if(this._.historyIndex === this._.history.length) {
+		this._.history.push(value);
+	}
+	var index = this._.historyIndex === 0 ? 0 : --this._.historyIndex;
+	this.setValue(this._.history[index]);
+	s.render();
+});
+
+UI.input.key('down', function() {
+	if(this._.historyIndex === this._.history.length) {
+		return;
+	} else if(this._.history[this._.historyIndex] !== this.getValue()) {
+		this._.history.pop();
+		this._.historyIndex = this._.history.length;
+		return;
+	} else {
+		var index = this._.historyIndex === (this._.history.length - 1) ? this._.historyIndex : ++this._.historyIndex;
+		this.setValue(this._.history[index]);
+		s.render();
+	}
 });
 
 UI.input.on('resize', function() {
@@ -542,6 +569,19 @@ UI.input.on('focus', function() {
 					UI.input.setValue(val.str.slice(0,-1));
 					s.render();
 				} else {
+					// If we select something farther back, wipe out what was in progress
+					if(UI.input._.historyIndex < UI.input._.history.length - 2) {
+						UI.input.history.pop();
+					}
+					// Add what we're entering to the history array
+					UI.input._.history.push(val.substring(0, val.length - 1));
+					// Peel off old values
+					if(UI.input._.history.length > G.maxBuffer) {
+						UI.input._.history.shift();
+					}
+					// Adjust index to latest + 1 (aka length, duh)
+					UI.input._.historyIndex = UI.input._.history.length;
+
 					if(val[0] == '/') {
 						fchat.parseArgs(val.substring(1, val.length - 1));
 					} else if (UI.currentBox._.channel) {
@@ -586,7 +626,7 @@ function pushBuffer(buffer) {
 
 UI.pushMessage = (function(push) {
 	return function(msg) {
-		if(typeof msg !== 'string') {
+		if(msg && typeof msg !== 'string') {
 			msg = msg.toString();
 		}
 		if(UI.currentBox !== UI.message) {
