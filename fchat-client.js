@@ -42,6 +42,11 @@ CMD.JCH = prep(['channel'], function(args) {
 	G.send('JCH', args);
 });
 
+CMD.LCH = prep(['channel'], function(args) {
+	UI.pushMessage(util.inspect(args));
+	G.send('LCH', args);
+});
+
 CMD.MSG = prep(['channel', 'message'], function(args) {
 	args.message = args.message.replace(/^:/,"/me ").slice(0,-1);
 	G.send('MSG', args);

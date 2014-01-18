@@ -449,9 +449,9 @@ UI.input = b.textarea({
 ,	label: 'Input'
 ,	tags: true
 ,	keys: true
-,	border: {
-		type: 'line'
-	}
+//,	border: {
+//		type: 'line'
+//	}
 ,	style: {
 		fg: 'white'
 	,	bg: 'black'
@@ -592,8 +592,8 @@ UI.input.on('focus', function() {
 					s.render();
 				} else {
 					// If we select something farther back, wipe out what was in progress
-					if(UI.input._.historyIndex < UI.input._.history.length - 2) {
-						UI.input.history.pop();
+					if(UI.input._.historyIndex < UI.input._.history.length) {
+						UI.input._.history.pop();
 					}
 					// Add what we're entering to the history array
 					UI.input._.history.push(val.substring(0, val.length - 1));
