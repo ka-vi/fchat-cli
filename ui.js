@@ -167,6 +167,7 @@ UI.leftList = function(title) {
 			}
 		}
 	});
+	list._.ritems = [];
 	list.key('up', function(ch, key) {
 		list.up(1);
 		s.render();
@@ -411,8 +412,8 @@ UI.chatBox = function(channel, title) {
 	G.chatsIndex = G.chatsArray.length - 1;
 	UI.windowList.add(title);
 	UI.windowList.items[G.chatsIndex]._.original = title;
-	UI.windowList.ritems.push([title, UI.windowList.ritems.length]);
-	UI.windowList.ritems.sort(windowListComparator);
+	UI.windowList._.ritems.push([title, UI.windowList._.ritems.length]);
+	UI.windowList._.ritems.sort(windowListComparator);
 	UI.windowList.select(G.chatsIndex);
 	return box;
 };
@@ -433,8 +434,8 @@ UI.pmBox = function(character) {
 	G.chatsArray.push(G.pms[character]);
 	UI.windowList.add(character);
 	UI.windowList.items[G.chatsArray.length - 1]._.original = character;
-	UI.windowList.ritems.push([character, UI.windowList.ritems.length]);
-	UI.windowList.ritems.sort(windowListComparator);
+	UI.windowList._.ritems.push([character, UI.windowList._.ritems.length]);
+	UI.windowList._.ritems.sort(windowListComparator);
 	return box;
 };
 
@@ -449,9 +450,9 @@ UI.input = b.textarea({
 ,	label: 'Input'
 ,	tags: true
 ,	keys: true
-//,	border: {
-//		type: 'line'
-//	}
+,	border: {
+		type: 'line'
+	}
 ,	style: {
 		fg: 'white'
 	,	bg: 'black'
@@ -652,9 +653,9 @@ UI.pushMessage = (function(push) {
 			msg = msg.toString();
 		}
 		if(UI.currentBox !== UI.message) {
-			var ri = binarySearch(UI.windowList.ritems, UI.message._.title, unreadComparator);
-			var i = UI.windowList.ritems[ri][1];
-			UI.windowList.items[i].setContent('{red-fg}' + UI.windowList.ritems[ri][0] + ' (' + (++UI.message._.unread) + '){/}');
+			var ri = binarySearch(UI.windowList._.ritems, UI.message._.title, unreadComparator);
+			var i = UI.windowList._.ritems[ri][1];
+			UI.windowList.items[i].setContent('{red-fg}' + UI.windowList._.ritems[ri][0] + ' (' + (++UI.message._.unread) + '){/}');
 		}
 		push(msg);
 	};
@@ -680,9 +681,9 @@ UI.pushChat = function(channel, character, message) {
 	box.log.writeStream.write(message + '\n');
 	message = message.replace(G.characterRegex, '{yellow-fg}$&{/}');
 	if(box.box !== UI.currentBox) {
-		var ri = binarySearch(UI.windowList.ritems, box.title, unreadComparator);
-		var i = UI.windowList.ritems[ri][1];
-		UI.windowList.items[i].setContent('{red-fg}' + UI.windowList.ritems[ri][0] + ' (' + (++box.unread) + '){/}');
+		var ri = binarySearch(UI.windowList._.ritems, box.title, unreadComparator);
+		var i = UI.windowList._.ritems[ri][1];
+		UI.windowList.items[i].setContent('{red-fg}' + UI.windowList._.ritems[ri][0] + ' (' + (++box.unread) + '){/}');
 	}
 	box.pushChat(message, box.noScroll);
 }
