@@ -175,6 +175,12 @@ UI.leftList = function(title) {
 		list.down(1);
 		s.render();
 	});
+	list.key('pageup', function(ch, key) {
+		list.up(p.rows - 2);
+	});
+	list.key('pagedown', function(ch, key) {
+		list.down(p.rows - 2);
+	});
 	list.on('resize', function() {
 		this.position.height = p.rows;
 	});
@@ -433,11 +439,9 @@ UI.input = b.textarea({
 ,	label: 'Input'
 ,	tags: true
 ,	keys: true
-//	This currently has a problem with rendering and clearValue()
-//	where the cursor jumps up 2 lines
-//,	border: {
-//		type: 'line'
-//	}
+,	border: {
+		type: 'line'
+	}
 ,	style: {
 		fg: 'white'
 	,	bg: 'black'
