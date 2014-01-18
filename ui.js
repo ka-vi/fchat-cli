@@ -65,8 +65,9 @@ function exit(ch, key) {
 	  }
 	  ;
 	G.chatsArray.forEach(function(chat) {
-		chat.log.on('finish', exitLatch);
-		chat.log.end();
+		chat.log.writeStream.on('finish', exitLatch);
+		chat.log.writeStream.end();
+		clearTimeout(chat.log.timeout);
 	});
 }
 
@@ -349,13 +350,37 @@ UI.baseBox = function(title) {
 	return box;
 };
 
+function logger(title, channel) {
+	var l = {}
+	  , now = Date.now()
+	  , d = new Date(now)
+	  , year = d.getFullYear()
+	  , month = d.getMonth() + 1
+	  , date = d.getDate()
+	  , p = new Date(year, month-1, date)
+	  , timeout = G.millisInDay - (now - p.getTime())
+	  ;
+
+	if(channel) {
+		l.file = util.format('logs/%s.%s.%s.%s-%s-%s.log', G.character, sanitize(title), channel, year, month < 10 ? '0' + month : month, date < 10 ? '0' + date : date);
+	} else {
+		l.file = util.format('logs/%s.%s.%s-%s-%s.log', G.character, title, year, month < 10 ? '0' + month : month, date < 10 ? '0' + date : date)
+	}
+	l.writeStream = fs.createWriteStream(l.file, {flags: 'a', encoding: 'utf8', mode: 0666});
+	l.timeout = setTimeout(function() {
+		l.writeStream.end();
+		var newLogger = logger(title, channel);
+		l.file = newLogger.file;
+		l.writeStream = newLogger.writeStream;
+		l.timeout = newLogger.timeout;
+	}, timeout);
+	
+	return l;
+}
+
 UI.chatBox = function(channel, title) {
 	var box = UI.baseBox(title)
-	  , d = new Date(Date.now())
-	  , date = d.getDate()
-	  , month = d.getMonth() + 1
-	  , year = d.getFullYear()
-	  , file = util.format('logs/%s.%s.%s.%s-%s-%s.log', G.character, sanitize(title), channel, year, month < 10 ? '0' + month : month, date < 10 ? '0' + date : date)
+	  , l = logger(title, channel)
 	  ;
 	box._ = G.chats[channel] = {
 		channel: channel
@@ -363,7 +388,7 @@ UI.chatBox = function(channel, title) {
 	,	box: box
 	,	list: UI.userList()
 	,	pushChat: pushBuffer(box)
-	,	log: fs.createWriteStream(file, {flags: 'a', encoding: 'utf8', mode: 0666})
+	,	log: l
 	,	unread: 0
 	};
 	G.chatsArray.push(G.chats[channel]);
@@ -378,11 +403,7 @@ UI.chatBox = function(channel, title) {
 
 UI.pmBox = function(character) {
 	var box = UI.baseBox(character)
-	  , d = new Date(Date.now())
-	  , date = d.getDate()
-	  , month = d.getMonth() + 1
-	  , year = d.getFullYear()
-	  , file = util.format('logs/%s.%s.%s-%s-%s.log', G.character, character, year, month < 10 ? '0' + month : month, date < 10 ? '0' + date : date)
+	  , l = logger(character)
 	  ;
 	box._ = G.pms[character] = {
 		channel: null
@@ -390,7 +411,7 @@ UI.pmBox = function(character) {
 	,	box: box
 	,	list: UI.userList()
 	,	pushChat: pushBuffer(box)
-	,	log: fs.createWriteStream(file, {flags: 'a', encoding: 'utf8', mode: 0666})
+	,	log: l
 	,	unread: 0
 	};
 	G.chatsArray.push(G.pms[character]);
@@ -436,6 +457,24 @@ UI.input.key('C-z', function() {
 	s.sigtstp(function() {
 		/* continued */
 	});
+});
+
+UI.input.key('pageup', function() {
+	UI.currentBox.scroll(9 - p.rows);
+	UI.currentBox._.noScroll = true;
+	s.render();
+});
+
+UI.input.key('pagedown', function() {
+	UI.currentBox.scroll(p.rows - 9);
+	if(UI.currentBox.getScroll() + 1 === UI.currentBox._clines.fake.length) {
+		UI.currentBox._.noScroll = false;
+	}
+	s.render();
+});
+
+UI.input.key('C-l', function() {
+	UI.pushMessage('' + Math.random());
 });
 
 UI.input.on('resize', function() {
@@ -533,18 +572,23 @@ UI.input.on('submit', function() {
 */
 
 function pushBuffer(buffer) {
-	return function(msg) {
+	return function(msg, noScroll) {
 		buffer.pushLine(msg);
 		if(buffer._clines.fake.length > (config.maxBuffer || G.maxBuffer)) {
 			buffer.shiftLine(1);
 		}
-		buffer.setScrollPerc(100);
+		if(!noScroll) {
+			buffer.setScrollPerc(100);
+		}
 		s.render();
 	};
 }
 
 UI.pushMessage = (function(push) {
 	return function(msg) {
+		if(typeof msg !== 'string') {
+			msg = msg.toString();
+		}
 		if(UI.currentBox !== UI.message) {
 			var ri = binarySearch(UI.windowList.ritems, UI.message._.title, unreadComparator);
 			var i = UI.windowList.ritems[ri][1];
@@ -571,14 +615,14 @@ UI.pushChat = function(channel, character, message) {
 	} else {
 		message = character + ': ' + message;
 	}
-	box.log.write(message + '\n');
+	box.log.writeStream.write(message + '\n');
 	message = message.replace(G.characterRegex, '{yellow-fg}$&{/}');
 	if(box.box !== UI.currentBox) {
 		var ri = binarySearch(UI.windowList.ritems, box.title, unreadComparator);
 		var i = UI.windowList.ritems[ri][1];
 		UI.windowList.items[i].setContent('{red-fg}' + UI.windowList.ritems[ri][0] + ' (' + (++box.unread) + '){/}');
 	}
-	box.pushChat(message);
+	box.pushChat(message, box.noScroll);
 }
 
 /*

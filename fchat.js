@@ -3,7 +3,7 @@ var WebSocket = require('ws')
   , util = require('util')
   , Entities = require('html-entities').AllHtmlEntities
   , htmlEntities = new Entities()
-  , ws = new WebSocket('ws://chat.f-list.net:9722')
+  , ws = new WebSocket('ws://chat.f-list.net:8722')
   , fserver = require('./fchat-server')
   , fclient = require('./fchat-client')
   , G = require('./global')
@@ -27,6 +27,11 @@ G.ws = ws;
 
 ws.on('close', function() {
 	UI.pushMessage('Closed!');
+	/**
+	 * some kind of reconnect thing needs to happen
+	 * watch out for body.ticket, doesn't exist here!
+	 */
+	/*
 	process.nextTick(function() {
 		UI.pushMessage('Trying to reconnect...');
 		send('IDN', {
@@ -38,6 +43,7 @@ ws.on('close', function() {
 		,	cversion: '0.0.1'
 		});
 	});
+	*/
 });
 
 ws.on('open', function() {
