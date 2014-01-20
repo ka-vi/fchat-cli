@@ -24,7 +24,7 @@ s.on('JCH', function(args) {
 		UI.currentBox = box;
 		UI.focus = [UI.input, box._.list, box];
 		UI.focusIndex(0);
-		UI.input.focus();
+//		UI.input.focus();
 		UI.screen.render();
 	} else {
 		var ch = G.chats[args.channel];

@@ -236,8 +236,8 @@ UI.channelList._.render = function() {
 
 UI.channelList.key('enter', function(ch, key) {
 	fclient.JCH(this._.display[this.selected].name);
-	this.hide();
-	UI.input.focus();
+//	this.hide();
+//	UI.input.focus();
 	s.render();
 });
 
@@ -484,7 +484,7 @@ UI.input.key('pageup', function() {
 
 UI.input.key('pagedown', function() {
 	UI.currentBox.scroll(p.rows - 9);
-	if(UI.currentBox.getScroll() + 1 === UI.currentBox._clines.fake.length) {
+	if(UI.currentBox.getScrollPerc() === 100) {
 		UI.currentBox._.noScroll = false;
 	}
 	s.render();

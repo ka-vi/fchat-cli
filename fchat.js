@@ -3,13 +3,17 @@ var WebSocket = require('ws')
   , util = require('util')
   , Entities = require('html-entities').AllHtmlEntities
   , htmlEntities = new Entities()
-  , ws = new WebSocket('ws://chat.f-list.net:8722')
+  , ws = new WebSocket('ws://chat.f-list.net:9722')
   , fserver = require('./fchat-server')
   , fclient = require('./fchat-client')
   , G = require('./global')
   , UI = require('./ui')
   , config = require('./config')
   ;
+
+process.nextTick(function() {
+	UI = require('./ui');
+});
 
 function send(str, obj) {
 	if(obj) {
@@ -47,7 +51,6 @@ ws.on('close', function() {
 });
 
 ws.on('open', function() {
-	UI = require('./ui');
 	UI.pushMessage('Websocket connected!  Trying to get ticket...');
 	needle.post('https://www.f-list.net/json/getApiTicket.php', {
 		secure: 'yes'
