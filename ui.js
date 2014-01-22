@@ -378,9 +378,9 @@ function logger(title, channel) {
 	  ;
 
 	if(channel) {
-		l.file = util.format('logs/%s.%s.%s.%s-%s-%s.log', G.character, sanitize(title), channel, year, month < 10 ? '0' + month : month, date < 10 ? '0' + date : date);
+		l.file = util.format('logs/%s.%s.%s.%s-%s-%s.log', G.character, sanitize(title), sanitize(channel), year, month < 10 ? '0' + month : month, date < 10 ? '0' + date : date);
 	} else {
-		l.file = util.format('logs/%s.%s.%s-%s-%s.log', G.character, title, year, month < 10 ? '0' + month : month, date < 10 ? '0' + date : date)
+		l.file = util.format('logs/%s.%s.%s-%s-%s.log', G.character, sanitize(title), year, month < 10 ? '0' + month : month, date < 10 ? '0' + date : date)
 	}
 	l.writeStream = fs.createWriteStream(l.file, {flags: 'a', encoding: 'utf8', mode: 0666});
 	l.timeout = setTimeout(function() {
