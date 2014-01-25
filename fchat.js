@@ -112,7 +112,7 @@ function split(str, ch, limit) {
 }
 
 module.exports.parseArgs = function(str) {
-	var cmd = str.substring(0,3);
+	var cmd = str.substring(0,3).trim().toUpperCase();
 	if(fclient[cmd]) {
 		if(fclient[cmd].args) {
 			var sp = split(str, ' ', fclient[cmd].args.length);

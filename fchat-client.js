@@ -59,6 +59,14 @@ CMD.PRI = prep(['recipient', 'message'], function(args) {
 	UI.pushChat(null, G.character, args.message);
 });
 
+CMD.PM = prep(['recipient'], function(args) {
+	if(!G.pms[args.recipient]) {
+		var box = UI.pmBox(args.recipient);
+		box.hide();
+		box._.list.hide();
+	}
+});
+
 module.exports = CMD;
 
 setTimeout(function() {
