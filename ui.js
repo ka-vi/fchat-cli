@@ -56,6 +56,80 @@ s.on('resize', function() {
 	});
 });
 
+UI.exit = b.form({
+  parent: s,
+  keys: true,
+  left: 0,
+  top: 0,
+  width: 30,
+  height: 3
+,	label: 'Quit program?'
+,	border: {
+		type: 'line'
+	}
+
+});
+
+UI.exit._.quit = b.button({
+  parent: UI.exit,
+  mouse: true,
+  keys: true,
+  shrink: true,
+  padding: {
+    left: 1,
+    right: 1
+  },
+  top: UI.exit.position.top + 1,
+  left: UI.exit.position.left + 2,
+  shrink: true,
+  name: 'quit',
+  content: 'Quit',
+  style: {
+    focus: {
+      bg: 'red'
+    },
+    hover: {
+      bg: 'red'
+    }
+  }
+});
+
+UI.exit._.cancel = b.button({
+  parent: UI.exit,
+  mouse: true,
+  keys: true,
+  shrink: true,
+  padding: {
+    left: 1,
+    right: 1
+  },
+  left: 20,
+  top: UI.exit.position.top + 1,
+  shrink: true,
+  name: 'cancel',
+  content: 'Cancel',
+  style: {
+    focus: {
+      bg: 'red'
+    },
+    hover: {
+      bg: 'red'
+    }
+  }
+});
+
+UI.exit._.quit.on('press', function() {
+	exit();
+});
+
+UI.exit._.cancel.on('press', function() {
+	UI.focus = [UI.input, UI.currentBox._.list, UI.currentBox];
+	UI.focusIndex(0);
+	UI.exit.hide();
+	UI.input.focus();
+	s.render();
+});
+
 function exit(ch, key) {
 	var latchCount = G.chatsArray.length
 	  , exitLatch = function() {
@@ -167,6 +241,7 @@ UI.leftList = function(title) {
 			}
 		}
 	});
+	list._.ritems = [];
 	list.key('up', function(ch, key) {
 		list.up(1);
 		s.render();
@@ -313,13 +388,13 @@ UI.userList = function() {
 	list._.add = function(item) {
 		var i = binarySearch(list._.arr, item);
 		list._.arr.splice(i, 0, item);
-		list.setItems(list._.arr);
+		list.setItems(list._.arr.slice());
 	};
 	list._.remove = function(item) {
 		var i = binarySearch(list._.arr, item);
 		if(list._.arr[i] === item) {
 			list._.arr.splice(i, 1);
-			list.setItems(list._.arr);
+			list.setItems(list._.arr.slice());
 		}
 	};
 	list.on('resize', function() {
@@ -411,8 +486,8 @@ UI.chatBox = function(channel, title) {
 	G.chatsIndex = G.chatsArray.length - 1;
 	UI.windowList.add(title);
 	UI.windowList.items[G.chatsIndex]._.original = title;
-	UI.windowList.ritems.push([title, UI.windowList.ritems.length]);
-	UI.windowList.ritems.sort(windowListComparator);
+	UI.windowList._.ritems.push([title, UI.windowList._.ritems.length]);
+	UI.windowList._.ritems.sort(windowListComparator);
 	UI.windowList.select(G.chatsIndex);
 	return box;
 };
@@ -433,8 +508,8 @@ UI.pmBox = function(character) {
 	G.chatsArray.push(G.pms[character]);
 	UI.windowList.add(character);
 	UI.windowList.items[G.chatsArray.length - 1]._.original = character;
-	UI.windowList.ritems.push([character, UI.windowList.ritems.length]);
-	UI.windowList.ritems.sort(windowListComparator);
+	UI.windowList._.ritems.push([character, UI.windowList._.ritems.length]);
+	UI.windowList._.ritems.sort(windowListComparator);
 	return box;
 };
 
@@ -449,9 +524,9 @@ UI.input = b.textarea({
 ,	label: 'Input'
 ,	tags: true
 ,	keys: true
-//,	border: {
-//		type: 'line'
-//	}
+,	border: {
+		type: 'line'
+	}
 ,	style: {
 		fg: 'white'
 	,	bg: 'black'
@@ -575,6 +650,15 @@ UI.input.key('C-p', function(ch, key) {
 
 UI.input.key('C-c', exit);
 
+UI.input.key('C-o', function() {
+	UI.focus = [UI.exit, UI.exit._.quit, UI.exit._.cancel];
+	UI.focusIndex(2);
+	UI.exit.show();
+	UI.exit.setFront();
+	UI.exit._.cancel.focus();
+	s.render();
+});
+
 UI.input.key('tab', function(ch, key) {
 	if(UI.input._done) {
 		var m = {save: true, str: UI.input.value};
@@ -652,9 +736,9 @@ UI.pushMessage = (function(push) {
 			msg = msg.toString();
 		}
 		if(UI.currentBox !== UI.message) {
-			var ri = binarySearch(UI.windowList.ritems, UI.message._.title, unreadComparator);
-			var i = UI.windowList.ritems[ri][1];
-			UI.windowList.items[i].setContent('{red-fg}' + UI.windowList.ritems[ri][0] + ' (' + (++UI.message._.unread) + '){/}');
+			var ri = binarySearch(UI.windowList._.ritems, UI.message._.title, unreadComparator);
+			var i = UI.windowList._.ritems[ri][1];
+			UI.windowList.items[i].setContent('{red-fg}' + UI.windowList._.ritems[ri][0] + ' (' + (++UI.message._.unread) + '){/}');
 		}
 		push(msg);
 	};
@@ -673,16 +757,16 @@ function unreadComparator(a, b) {
 UI.pushChat = function(channel, character, message) {
 	var box = channel ? G.chats[channel] : G.character === character ? UI.currentBox._ : G.pms[character];
 	if(message.match(/^\/me/)) {
-		message = character + ' ' + message.substring(4);
+		message = '{bold}' + character + '{/} ' + message.substring(4);
 	} else {
-		message = character + ': ' + message;
+		message = '{bold}' + character + ':{/} ' + message;
 	}
 	box.log.writeStream.write(message + '\n');
 	message = message.replace(G.characterRegex, '{yellow-fg}$&{/}');
 	if(box.box !== UI.currentBox) {
-		var ri = binarySearch(UI.windowList.ritems, box.title, unreadComparator);
-		var i = UI.windowList.ritems[ri][1];
-		UI.windowList.items[i].setContent('{red-fg}' + UI.windowList.ritems[ri][0] + ' (' + (++box.unread) + '){/}');
+		var ri = binarySearch(UI.windowList._.ritems, box.title, unreadComparator);
+		var i = UI.windowList._.ritems[ri][1];
+		UI.windowList.items[i].setContent('{red-fg}' + UI.windowList._.ritems[ri][0] + ' (' + (++box.unread) + '){/}');
 	}
 	box.pushChat(message, box.noScroll);
 }
