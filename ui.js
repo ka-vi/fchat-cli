@@ -18,7 +18,7 @@ var UI = {};
 
 p.showCursor();
 
-s.key('C-c', exit);
+s.key('C-c', exitBox);
 
 s.key('tab', function(ch, key) {
 	UI.focus[UI.focusIndex()].focus();
@@ -129,6 +129,15 @@ UI.exit._.cancel.on('press', function() {
 	UI.input.focus();
 	s.render();
 });
+
+function exitBox() {
+	UI.focus = [UI.exit, UI.exit._.quit, UI.exit._.cancel];
+	UI.focusIndex(2);
+	UI.exit.show();
+	UI.exit.setFront();
+	UI.exit._.cancel.focus();
+	s.render();
+}
 
 function exit(ch, key) {
 	var latchCount = G.chatsArray.length
@@ -648,16 +657,7 @@ UI.input.key('C-p', function(ch, key) {
 	UI.prevChat();
 });
 
-UI.input.key('C-c', exit);
-
-UI.input.key('C-o', function() {
-	UI.focus = [UI.exit, UI.exit._.quit, UI.exit._.cancel];
-	UI.focusIndex(2);
-	UI.exit.show();
-	UI.exit.setFront();
-	UI.exit._.cancel.focus();
-	s.render();
-});
+UI.input.key('C-c', exitBox);
 
 UI.input.key('tab', function(ch, key) {
 	if(UI.input._done) {
