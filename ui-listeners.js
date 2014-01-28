@@ -24,7 +24,6 @@ s.on('JCH', function(args) {
 		UI.currentBox = box;
 		UI.focus = [UI.input, box._.list, box];
 		UI.focusIndex(0);
-//		UI.input.focus();
 		UI.screen.render();
 	} else {
 		var ch = G.chats[args.channel];
@@ -33,19 +32,15 @@ s.on('JCH', function(args) {
 	}
 });
 
+s.on('CDS', function(args) {
+	UI.pushChat(args.channel, 'DESCRIPTION', args.description);
+});
+
 s.on('PRI', function(args) {
 	if(!G.pms[args.character]) {
 		var box = UI.pmBox(args.character);
 		box.hide();
 		box._.list.hide();
-		/*
-		UI.currentBox.hide();
-		UI.currentBox._.list.hide();
-		UI.currentBox = box;
-		UI.focus = [UI.input, box._.list, box];
-		UI.focusIndex(0);
-		UI.input.focus();
-		*/
 	}
 	UI.pushChat(null, args.character, args.message);
 });

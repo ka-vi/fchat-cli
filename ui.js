@@ -6,7 +6,6 @@ var b = require('blessed')
   })
   , fchat = require('./fchat')
   , fclient = require('./fchat-client')
-  , fserver = require('./fchat-server')
   , G = require('./global')
   , util = require('util')
   , fs = require('fs')
@@ -770,17 +769,6 @@ UI.pushChat = function(channel, character, message) {
 	}
 	box.pushChat(message, box.noScroll);
 }
-
-/*
-for(var cmd in fserver) {
-	G.server.on(cmd, (function(_cmd) {
-		return function(args) {
-			args._cmd = _cmd;
-			UI.pushDebug(util.inspect(args));
-		};
-	})(cmd));
-}
-*/
 
 UI.currentBox = UI.message;
 UI.focus = [UI.input, UI.message._.list, UI.message];
