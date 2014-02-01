@@ -190,6 +190,8 @@ UI.debug.on('resize', function() {
 	this.position.height = p.rows;
 });
 
+UI.debug._.log = logger('_debug');
+
 function defaultComparator(a, b) {
 	return a.localeCompare(b);
 }
@@ -559,6 +561,11 @@ UI.input.key('C-z', function() {
 	});
 });
 
+UI.input.key('C-d', function() {
+	UI.debug.toggle();
+	s.render();
+});
+
 UI.input.key('pageup', function() {
 	UI.currentBox.scroll(9 - p.rows);
 	UI.currentBox._.noScroll = true;
@@ -743,7 +750,15 @@ UI.pushMessage = (function(push) {
 	};
 })(pushBuffer(UI.message));
 
-UI.pushDebug = pushBuffer(UI.debug);
+UI.pushDebug = (function(push) {
+	return function(msg, cmd) {
+		if(config.debug && cmd) {
+			msg._cmd = cmd;
+			UI.debug._.log.writeStream.write(JSON.stringify(msg) + '\n');
+		}
+		push(msg);
+	};
+})(pushBuffer(UI.debug));
 
 function windowListComparator(a, b) {
 	return defaultComparator(a[0], b[0]);
