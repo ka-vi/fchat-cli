@@ -3,5 +3,4 @@ module.exports = {
 	account: 'accountname'
 ,	password: 'password'
 ,	character: 'character'
-,	debug: true
 };
