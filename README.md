@@ -6,21 +6,25 @@ This software requires node.js to run, which you can get here: http://nodejs.org
 Once you have node.js installed, grab a copy of the program from here: https://github.com/ka-vi/fchat-cli/releases 
 
 After unzipping to a directory, go to it from a terminal, and type:
+
 ```
 npm install
 ```
 
 After that, create a config.js based on the config-sample.js file:
+
 ```
 cp config-sample.js config.js
 ```
 
 Use your favorite text editor to edit the values accordingly.  Once done, make your logs directory:
+
 ```
 mkdir logs
 ```
 
 Finally, start the program:
+
 ```
 node index.js
 ```
@@ -35,6 +39,9 @@ You can hit tab to move to the userlist, and use the up/down/page up/page down k
 To move between open windows, use ```Control + n``` and ```Control + p``` to go to next and previous windows.
 
 Lastly, to do an action, instead of typing ```/me some action```, instead start your line with a colon:
+
 ```:does a little dance```
+
 Would show up as
+
 ```Jake does a little dance```
