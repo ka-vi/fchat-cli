@@ -31,3 +31,5 @@ Once the Main Window says you've been connected to your character, you may use a
 You can hit tab to move to the userlist, and use the up/down/page up/page down keys to scroll the user list.  Use ```/pm username``` to create a new window for private messaging.
 
 ```Control + c``` is used to bring up the exit dialog.
+
+To move between open windows, use ```Control + n``` and ```Control + p``` to go to next and previous windows.
