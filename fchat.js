@@ -83,7 +83,6 @@ ws.on('message', function(msg) {
 	} catch (e) {
 
 	}
-	UI.pushDebug(json, cmd);
 	G.server.emit(cmd, json);
 });
 

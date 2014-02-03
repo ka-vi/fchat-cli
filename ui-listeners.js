@@ -77,7 +77,7 @@ s.on('ICH', function(args) {
 	ch.list._.arr = args.users.sort(function(a,b){return a.identity.localeCompare(b.identity);}).map(function(user) {
 		return user.identity;
 	});
-	ch.list.setItems(ch.list._.arr);
+	ch.list.setItems(ch.list._.arr.slice());
 	UI.screen.render();
 });
 

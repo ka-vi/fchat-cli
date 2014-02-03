@@ -186,6 +186,8 @@ UI.debug = b.text({
 	}
 });
 
+UI.debug.hide();
+
 UI.debug.on('resize', function() {
 	this.position.height = p.rows;
 });
@@ -398,12 +400,14 @@ UI.userList = function() {
 	list._.add = function(item) {
 		var i = binarySearch(list._.arr, item);
 		list._.arr.splice(i, 0, item);
+		list.setItems([]);
 		list.setItems(list._.arr.slice());
 	};
 	list._.remove = function(item) {
 		var i = binarySearch(list._.arr, item);
 		if(list._.arr[i] === item) {
 			list._.arr.splice(i, 1);
+			list.setItems([]);
 			list.setItems(list._.arr.slice());
 		}
 	};
@@ -563,6 +567,7 @@ UI.input.key('C-z', function() {
 
 UI.input.key('C-d', function() {
 	UI.debug.toggle();
+	UI.windowList.toggle();
 	s.render();
 });
 
@@ -752,8 +757,10 @@ UI.pushMessage = (function(push) {
 
 UI.pushDebug = (function(push) {
 	return function(msg, cmd) {
-		if(config.debug && cmd) {
-			msg._cmd = cmd;
+		if(config.debug) {
+			if(cmd) {
+				msg._cmd = cmd;
+			}
 			UI.debug._.log.writeStream.write(JSON.stringify(msg) + '\n');
 		}
 		push(msg);
