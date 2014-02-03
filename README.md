@@ -33,3 +33,8 @@ You can hit tab to move to the userlist, and use the up/down/page up/page down k
 ```Control + c``` is used to bring up the exit dialog.
 
 To move between open windows, use ```Control + n``` and ```Control + p``` to go to next and previous windows.
+
+Lastly, to do an action, instead of typing ```/me some action```, instead start your line with a colon:
+```:does a little dance```
+Would show up as
+```Jake does a little dance```
