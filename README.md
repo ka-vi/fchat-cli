@@ -10,7 +10,12 @@ After unzipping to a directory, go to it from a terminal, and type:
 npm install
 ```
 
-after that, do:
+After that, create a config.js based on the config-sample.js file:
+```
+cp config-sample.js config.js
+```
+
+Use your favorite text editor to edit the values accordingly.  Once done, do:
 ```
 node index.js
 ```
