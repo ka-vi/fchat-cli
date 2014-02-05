@@ -455,7 +455,7 @@ UI.baseBox = function(title) {
 	return box;
 };
 
-function logger(title, channel) {
+function logger(title, channel, log) {
 	var l = {}
 	  , now = Date.now()
 	  , d = new Date(now)
@@ -472,15 +472,16 @@ function logger(title, channel) {
 		l.file = util.format('logs/%s.%s.%s-%s-%s.log', G.character, sanitize(title), year, month < 10 ? '0' + month : month, date < 10 ? '0' + date : date)
 	}
 	l.writeStream = fs.createWriteStream(l.file, {flags: 'a', encoding: 'utf8', mode: 0666});
-	l.timeout = setTimeout(function() {
-		l.writeStream.end();
-		var newLogger = logger(title, channel);
-		l.file = newLogger.file;
-		l.writeStream = newLogger.writeStream;
-		l.timeout = newLogger.timeout;
+	log = log || l;
+	log.timeout = setTimeout(function() {
+		log.writeStream.end();
+		var newLogger = logger(title, channel, log);
+		log.file = newLogger.file;
+		log.writeStream = newLogger.writeStream;
+		log.timeout = newLogger.timeout;
 	}, timeout);
 	
-	return l;
+	return log;
 }
 
 UI.chatBox = function(channel, title) {
