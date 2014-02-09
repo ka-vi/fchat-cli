@@ -473,7 +473,7 @@ function logger(title, channel, log) {
 	}
 	l.writeStream = fs.createWriteStream(l.file, {flags: 'a', encoding: 'utf8', mode: 0666});
 	log = log || l;
-	log.timeout = setTimeout(function() {
+	l.timeout = setTimeout(function() {
 		log.writeStream.end();
 		var newLogger = logger(title, channel, log);
 		log.file = newLogger.file;
@@ -481,7 +481,7 @@ function logger(title, channel, log) {
 		log.timeout = newLogger.timeout;
 	}, timeout);
 	
-	return log;
+	return l;
 }
 
 UI.chatBox = function(channel, title) {
@@ -791,7 +791,35 @@ UI.pushChat = function(channel, character, message) {
 		UI.windowList.items[i].setContent('{red-fg}' + UI.windowList._.ritems[ri][0] + ' (' + (++box.unread) + '){/}');
 	}
 	box.pushChat(message, box.noScroll);
-}
+};
+
+UI.closeWindow = function(channel, character) {
+	var box = channel ? G.chats[channel] : G.pms[character];
+	var ri = binarySearch(UI.windowList._.ritems, box.title, unreadComparator);
+	var i = UI.windowList._.ritems[ri][1];
+	UI.nextChat();
+	var items = UI.windowList.items.map(function(item) {
+		return [item.getContent(), item._.original];
+	});
+	items.splice(i, 1);
+	UI.windowList.setItems([]);
+	items.forEach(function(item, index) {
+		UI.windowList.add(item[0]);
+		UI.windowList.items[index]._.original = item[1];
+	});
+	G.chatsArray.splice(i, 1);
+	for(var j = 0; j < UI.windowList._.ritems.length; j++) {
+		if(UI.windowList._.ritems[j][1] > i) {
+			UI.windowList._.ritems[j][1]--;
+		}
+	}
+	UI.windowList._.ritems.splice(ri, 1);
+	box.box.hide();
+	box.list.hide();
+	box.box.detach();
+	box.list.detach();
+	s.render();
+};
 
 UI.currentBox = UI.message;
 UI.focus = [UI.input, UI.message._.list, UI.message];
@@ -801,7 +829,7 @@ UI.focusIndex = (function() {
 		if(set) {
 			i = set;
 		} else {
-			i = (i+1) % 3;
+			i = (i+1) % UI.focus.length;
 		}
 		return i;
 	};

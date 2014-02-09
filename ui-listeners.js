@@ -47,7 +47,7 @@ s.on('PRI', function(args) {
 
 s.on('LCH', function(args) {
 	if(G.character === args.character) {
-		
+		UI.closeWindow(args.channel);
 	} else {
 		var ch = G.chats[args.channel];
 		ch.list._.remove(args.character);
