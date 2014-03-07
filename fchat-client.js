@@ -47,7 +47,6 @@ CMD.LCH = prep(['channel'], function(args) {
 		UI.pushMessage(util.inspect(args));
 		G.send('LCH', args);
 	} else {
-		args = {};
 		if(UI.currentBox._.channel) {
 			args = {channel: UI.currentBox._.channel};
 			G.send('LCH', args);
