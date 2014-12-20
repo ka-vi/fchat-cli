@@ -276,13 +276,53 @@ UI.leftList = function(title) {
 	return list;
 };
 
+UI.horizontalList = function() {
+	var list = b.listbar({
+		parent: s
+	,	top: p.rows - 7
+	,	left: 0
+	,	width: p.cols
+	,	height: 1
+	,	scrollable: true
+	,	tags: true
+	,	style: {
+			fg: 'white'
+		,	bg: 'blue'
+		,	selected: {
+				fg: 'black'
+			,	bg: 'green'
+			}
+		}
+	});
+	list._.ritems = [];
+	list.key('left', function(ch, key) {
+		list.moveLeft(1);
+		s.render();
+	});
+	list.key('right', function(ch, key) {
+		list.moveRight(1);
+		s.render();
+	});
+	list.on('resize', function() {
+		this.position.width = p.cols;
+	});
+	return list;
+};
 
+/*
 UI.windowList = UI.leftList('Window List');
 UI.windowList.on('resize', function() {
 	this.position.height = p.rows;
 });
+*/
+UI.windowList = UI.horizontalList();
+UI.windowList.on('resize', function() {
+	this.position.width = p.cols;
+	this.position.top = p.rows - 7;
+});
 
 UI.channelList = UI.leftList('Channel List');
+UI.channelList.setIndex(100);
 UI.channelList.key('escape', function() {
 	this.hide();
 	UI.input.focus();
@@ -354,9 +394,9 @@ UI.userList = function() {
 	var list = b.list({
 		parent: s
 	,	top: 0
-	,	left: (p.cols - 40)
-	,	width: 40
-	,	height: (p.rows - 6)
+	,	left: (p.cols - 20)
+	,	width: 20
+	,	height: (p.rows - 7)
 	,	label: 'Users'
 	,	scrollable: true
 	,	border: {
@@ -412,8 +452,8 @@ UI.userList = function() {
 		}
 	};
 	list.on('resize', function() {
-		this.position.height = p.rows - 6;
-		this.position.left = p.cols - 40;
+		this.position.height = p.rows - 7;
+		this.position.left = p.cols - 20;
 	});
 	return list;
 }
@@ -422,9 +462,9 @@ UI.baseBox = function(title) {
 	var box = b.text({
 		parent: s
 	,	top: 0
-	,	left: 40
-	,	width: (p.cols - 80)
-	,	height: (p.rows - 6)
+	,	left: 0
+	,	width: (p.cols - 20)
+	,	height: (p.rows - 7)
 	,	content: 'The opening\nmessage'
 	,	label: title
 	,	tags: true
@@ -449,9 +489,10 @@ UI.baseBox = function(title) {
 		}
 	});
 	box.on('resize', function() {
-		this.position.height = p.rows - 6;
-		this.position.width = p.cols - 80;
+		this.position.height = p.rows - 7;
+		this.position.width = p.cols - 20;
 	});
+	box.setIndex(1);
 	return box;
 };
 
@@ -499,7 +540,7 @@ UI.chatBox = function(channel, title) {
 	};
 	G.chatsArray.push(G.chats[channel]);
 	G.chatsIndex = G.chatsArray.length - 1;
-	UI.windowList.add(title);
+	UI.windowList.add(title + '      ');
 	UI.windowList.items[G.chatsIndex]._.original = title;
 	UI.windowList._.ritems.push([title, UI.windowList._.ritems.length]);
 	UI.windowList._.ritems.sort(windowListComparator);
@@ -533,8 +574,8 @@ UI.message = UI.chatBox('_main', 'Main Window');
 UI.input = b.textarea({
 	parent: s
 ,	top: (p.rows - 6)
-,	left: 40
-,	width: (p.cols - 40)
+,	left: 0
+,	width: (p.cols - 20)
 ,	height: 6
 ,	label: 'Input'
 ,	tags: true
@@ -550,6 +591,7 @@ UI.input = b.textarea({
 		}
 	}
 });
+UI.input.setIndex(1);
 
 UI.input._.history = [];
 UI.input._.historyIndex = 0;
@@ -624,7 +666,7 @@ UI.input.key('down', function() {
 
 UI.input.on('resize', function() {
 	this.position.top = p.rows - 6;
-	this.position.width = p.cols - 40;
+	this.position.width = p.cols - 20;
 });
 
 UI.prevChat = function() {
