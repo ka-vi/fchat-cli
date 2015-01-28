@@ -15,7 +15,7 @@
   "dependencies": {
     "ws": "~0.4.31",
     "needle": "~0.6.3",
-    "blessed": "0.0.37",
+    "blessed": "0.0.38",
     "sanitize-filename": "~1.0.1",
     "html-entities": "~1.0.10"
   }

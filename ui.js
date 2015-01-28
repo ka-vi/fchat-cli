@@ -729,25 +729,28 @@ UI.input.on('focus', function() {
 					UI.input.setValue(val.str.slice(0,-1));
 					s.render();
 				} else {
-					// If we select something farther back, wipe out what was in progress
-					if(UI.input._.historyIndex < UI.input._.history.length) {
-						UI.input._.history.pop();
-					}
-					// Add what we're entering to the history array
-					UI.input._.history.push(val.substring(0, val.length - 1));
-					// Peel off old values
-					if(UI.input._.history.length > G.maxBuffer) {
-						UI.input._.history.shift();
-					}
-					// Adjust index to latest + 1 (aka length, duh)
-					UI.input._.historyIndex = UI.input._.history.length;
-
-					if(val[0] == '/') {
-						fchat.parseArgs(val.substring(1, val.length - 1));
-					} else if (UI.currentBox._.channel) {
-						fclient.MSG(UI.currentBox._.channel, val);
-					} else {
-						fclient.PRI(UI.currentBox._.title, val);
+					// val.length === 1 means we only got enter, ie, empty message send.  Don't show/send that.
+					if(val.length > 1) {
+						// If we select something farther back, wipe out what was in progress
+						if(UI.input._.historyIndex < UI.input._.history.length) {
+							UI.input._.history.pop();
+						}
+						// Add what we're entering to the history array
+						UI.input._.history.push(val.substring(0, val.length - 1));
+						// Peel off old values
+						if(UI.input._.history.length > G.maxBuffer) {
+							UI.input._.history.shift();
+						}
+						// Adjust index to latest + 1 (aka length, duh)
+						UI.input._.historyIndex = UI.input._.history.length;
+	
+						if(val[0] == '/') {
+							fchat.parseArgs(val.substring(1, val.length - 1));
+						} else if (UI.currentBox._.channel) {
+							fclient.MSG(UI.currentBox._.channel, val);
+						} else {
+							fclient.PRI(UI.currentBox._.title, val);
+						}
 					}
 					UI.input.clearValue();
 					s.render();
