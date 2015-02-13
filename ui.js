@@ -286,8 +286,10 @@ UI.horizontalList = function() {
 	,	scrollable: true
 	,	tags: true
 	,	style: {
-			fg: 'white'
-		,	bg: 'blue'
+			item: {
+				fg: 'white'
+			,	bg: 'blue'
+			}
 		,	selected: {
 				fg: 'black'
 			,	bg: 'green'
@@ -795,7 +797,7 @@ UI.pushMessage = (function(push) {
 		if(UI.currentBox !== UI.message) {
 			var ri = binarySearch(UI.windowList._.ritems, UI.message._.title, unreadComparator);
 			var i = UI.windowList._.ritems[ri][1];
-			UI.windowList.items[i].setContent('{red-fg}' + UI.windowList._.ritems[ri][0] + ' (' + (++UI.message._.unread) + '){/}');
+			UI.windowList.items[i].setContent('{bold}{yellow-fg}' + UI.windowList._.ritems[ri][0] + ' (' + (++UI.message._.unread) + '){/}{/}');
 		}
 		push(msg);
 	};
@@ -833,7 +835,7 @@ UI.pushChat = function(channel, character, message) {
 	if(box.box !== UI.currentBox) {
 		var ri = binarySearch(UI.windowList._.ritems, box.title, unreadComparator);
 		var i = UI.windowList._.ritems[ri][1];
-		UI.windowList.items[i].setContent('{red-fg}' + UI.windowList._.ritems[ri][0] + ' (' + (++box.unread) + '){/}');
+		UI.windowList.items[i].setContent('{bold}{yellow-fg}' + UI.windowList._.ritems[ri][0] + ' (' + (++box.unread) + '){/}{/}');
 	}
 	box.pushChat(message, box.noScroll);
 };
