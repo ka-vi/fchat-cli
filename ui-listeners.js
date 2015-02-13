@@ -24,11 +24,11 @@ s.on('JCH', function(args) {
 		UI.currentBox = box;
 		UI.focus = [UI.input, box._.list, box];
 		UI.focusIndex(0);
-		UI.screen.render();
+		UI.render();
 	} else {
 		var ch = G.chats[args.channel];
 		ch.list._.add(args.character.identity);
-		UI.screen.render();
+		UI.render();
 	}
 });
 
@@ -51,7 +51,7 @@ s.on('LCH', function(args) {
 	} else {
 		var ch = G.chats[args.channel];
 		ch.list._.remove(args.character);
-		UI.screen.render();
+		UI.render();
 	}
 });
 
@@ -62,7 +62,7 @@ s.on('FLN', function(args) {
 		for(var chat in G.chats) {
 			G.chats[chat].list._.remove(args.character);
 		}
-		UI.screen.render();
+		UI.render();
 	}
 });
 
@@ -78,7 +78,7 @@ s.on('ICH', function(args) {
 		return user.identity;
 	});
 	ch.list.setItems(ch.list._.arr.slice());
-	UI.screen.render();
+	UI.render();
 });
 
 s.on('CHA', function(args) {
@@ -88,7 +88,7 @@ s.on('CHA', function(args) {
 	UI.channelList._.setAndSort(args);
 	UI.channelList.show();
 	UI.channelList.focus();
-	UI.screen.render();
+	UI.render();
 });
 
 s.on('ORS', function(args) {
@@ -98,5 +98,5 @@ s.on('ORS', function(args) {
 	UI.channelList._.setAndSort(args);
 	UI.channelList.show();
 	UI.channelList.focus();
-	UI.screen.render();
+	UI.render();
 });

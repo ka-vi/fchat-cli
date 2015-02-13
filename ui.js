@@ -13,7 +13,21 @@ var b = require('blessed')
   , sanitize = require('sanitize-filename')
   ;
 
+var render = (function() {
+    var canRender = true;
+    return function(wait) {
+        if(wait) {
+            canRender = !canRender;
+        }
+        if(canRender) {
+            s.render();
+        }
+    };
+})();
+
 var UI = {};
+
+UI.render = render;
 
 p.showCursor();
 
@@ -39,7 +53,7 @@ s.key('C-z', function() {
 
 s.key('C-d', function(ch, key) {
 	UI.debug.toggle();
-	s.render();
+	render();
 });
 
 /*
@@ -48,10 +62,14 @@ s.on('keypress', function(one, two) {
 });
 */
 
+p.on('resize', function() {
+    render(true);
+});
+
 s.on('resize', function() {
 	process.nextTick(function() {
 		s.clearRegion(0, p.cols, 0, p.rows);
-		s.render();
+		render(true);
 	});
 });
 
@@ -126,7 +144,7 @@ UI.exit._.cancel.on('press', function() {
 	UI.focusIndex(0);
 	UI.exit.hide();
 	UI.input.focus();
-	s.render();
+	render();
 });
 
 function exitBox() {
@@ -135,7 +153,7 @@ function exitBox() {
 	UI.exit.show();
 	UI.exit.setFront();
 	UI.exit._.cancel.focus();
-	s.render();
+	render();
 }
 
 function exit(ch, key) {
@@ -256,19 +274,19 @@ UI.leftList = function(title) {
 	list._.ritems = [];
 	list.key('up', function(ch, key) {
 		list.up(1);
-		s.render();
+		render();
 	});
 	list.key('down', function(ch, key) {
 		list.down(1);
-		s.render();
+		render();
 	});
 	list.key('pageup', function(ch, key) {
 		list.up(p.rows - 2);
-		s.render();
+		render();
 	});
 	list.key('pagedown', function(ch, key) {
 		list.down(p.rows - 2);
-		s.render();
+		render();
 	});
 	list.on('resize', function() {
 		this.position.height = p.rows;
@@ -299,11 +317,11 @@ UI.horizontalList = function() {
 	list._.ritems = [];
 	list.key('left', function(ch, key) {
 		list.moveLeft(1);
-		s.render();
+		render();
 	});
 	list.key('right', function(ch, key) {
 		list.moveRight(1);
-		s.render();
+		render();
 	});
 	list.on('resize', function() {
 		this.position.width = p.cols;
@@ -328,7 +346,7 @@ UI.channelList.setIndex(100);
 UI.channelList.key('escape', function() {
 	this.hide();
 	UI.input.focus();
-	s.render();
+	render();
 });
 UI.channelList.hide();
 UI.channelList._.sorts = [
@@ -367,7 +385,7 @@ UI.channelList.key('enter', function(ch, key) {
 	fclient.JCH(this._.display[this.selected].name);
 //	this.hide();
 //	UI.input.focus();
-	s.render();
+	render();
 });
 
 UI.channelList.key('C-s', function(ch, key) {
@@ -376,7 +394,7 @@ UI.channelList.key('C-s', function(ch, key) {
 	this._.display.sort(sort);
 	this._.render();
 	this._.sorts.push(sort);
-	s.render();
+	render();
 });
 
 UI.channelList.key('C-e', function(ch, key) {
@@ -389,7 +407,7 @@ UI.channelList.key('C-e', function(ch, key) {
 	}
 	this._.hideEmpty = !this._.hideEmpty;
 	this._.render();
-	s.render();
+	render();
 });
 
 UI.userList = function() {
@@ -424,19 +442,19 @@ UI.userList = function() {
 	});
 	list.key('up', function(ch, key) {
 		list.up(1);
-		s.render();
+		render();
 	});
 	list.key('down', function(ch, key) {
 		list.down(1);
-		s.render();
+		render();
 	});
 	list.key('pageup', function(ch, key) {
 		list.up(p.rows - 9);
-		s.render();
+		render();
 	});
 	list.key('pagedown', function(ch, key) {
 		list.down(p.rows - 9);
-		s.render();
+		render();
 	});
 	list._.arr = [];
 	list._.add = function(item) {
@@ -613,13 +631,13 @@ UI.input.key('C-z', function() {
 UI.input.key('C-d', function() {
 	UI.debug.toggle();
 	UI.windowList.toggle();
-	s.render();
+	render();
 });
 
 UI.input.key('pageup', function() {
 	UI.currentBox.scroll(9 - p.rows);
 	UI.currentBox._.noScroll = true;
-	s.render();
+	render();
 });
 
 UI.input.key('pagedown', function() {
@@ -627,7 +645,7 @@ UI.input.key('pagedown', function() {
 	if(UI.currentBox.getScrollPerc() === 100) {
 		UI.currentBox._.noScroll = false;
 	}
-	s.render();
+	render();
 });
 
 UI.input.key('up', function() {
@@ -644,7 +662,7 @@ UI.input.key('up', function() {
 	// Regular going up in history stuff
 	var index = this._.historyIndex === 0 ? 0 : --this._.historyIndex;
 	this.setValue(this._.history[index]);
-	s.render();
+	render();
 });
 
 UI.input.key('down', function() {
@@ -662,7 +680,7 @@ UI.input.key('down', function() {
 	else {
 		var index = this._.historyIndex === (this._.history.length - 1) ? this._.historyIndex : ++this._.historyIndex;
 		this.setValue(this._.history[index]);
-		s.render();
+		render();
 	}
 });
 
@@ -685,7 +703,7 @@ UI.prevChat = function() {
 	UI.focus = [UI.input, box.list, box.box];
 	UI.focusIndex(0);
 	UI.input.focus();
-	s.render();
+	render();
 };
 
 UI.nextChat = function() {
@@ -702,7 +720,7 @@ UI.nextChat = function() {
 	UI.focus = [UI.input, box.list, box.box];
 	UI.focusIndex(0);
 	UI.input.focus();
-	s.render();
+	render();
 };
 
 UI.input.key('C-n', function(ch, key) {
@@ -729,7 +747,7 @@ UI.input.on('focus', function() {
 			if(!err && val) {
 				if(val.save) {
 					UI.input.setValue(val.str.slice(0,-1));
-					s.render();
+					render();
 				} else {
 					// val.length === 1 means we only got enter, ie, empty message send.  Don't show/send that.
 					if(val.length > 1) {
@@ -755,7 +773,7 @@ UI.input.on('focus', function() {
 						}
 					}
 					UI.input.clearValue();
-					s.render();
+					render();
 					UI.input.focus();
 				}
 			}
@@ -771,7 +789,7 @@ UI.input.on('focus', function() {
 UI.input.on('submit', function() {
 	UI.pushMessage('submit');
 	UI.input.clearValue();
-	s.render();
+	render();
 	UI.input.focus();
 });
 */
@@ -785,7 +803,7 @@ function pushBuffer(buffer) {
 		if(!noScroll) {
 			buffer.setScrollPerc(100);
 		}
-		s.render();
+		render();
 	};
 }
 
@@ -865,7 +883,7 @@ UI.closeWindow = function(channel, character) {
 	box.list.hide();
 	box.box.detach();
 	box.list.detach();
-	s.render();
+	render();
 };
 
 UI.currentBox = UI.message;
@@ -882,10 +900,10 @@ UI.focusIndex = (function() {
 	};
 })();
 UI.input.focus();
-s.render();
+render();
 
 UI.pushMessage('' + p.rows + ' ' + p.cols);
 
-//setInterval(function(){s.render();}, 100);
+//setInterval(function(){render();}, 100);
 
 module.exports = UI;
