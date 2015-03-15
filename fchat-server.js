@@ -22,6 +22,10 @@ CMD.CON = function(args) {
 	G.CON = args.count;
 };
 
+CMD.RTB = function(args) {
+    fclient.RTB(args);
+};
+
 CMD.FRL = function(args) {
 };
 

@@ -37,6 +37,10 @@ CMD.ORS = function() {
 	G.send('ORS');
 };
 
+CMD.RTB = function(args) {
+    UI.pushMessage(util.inspect(args));
+};
+
 CMD.JCH = prep(['channel'], function(args) {
 	UI.pushMessage(util.inspect(args));
 	G.send('JCH', args);
